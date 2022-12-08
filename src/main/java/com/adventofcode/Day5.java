@@ -76,6 +76,31 @@ public class Day5 {
       return containers;
    }
    
+   public String part2() throws IOException, URISyntaxException {
+      Map<Integer, List<String>> state = initState();
+
+      try (CSVReader csvReader = createCsvReader()) {
+         csvReader.skip(10);
+         Iterator<String[]> iterator = csvReader.iterator();
+            
+         while (iterator.hasNext()) {
+            String[] fields = iterator.next();
+            if (fields.length < 1 || fields[0].isBlank()) continue;
+            
+            moveCrates9001(state, fields[0]);
+         }
+      }
+      
+      String containers = "";
+      
+      for (List<String> stack : state.values()) {
+         if (stack.isEmpty()) continue;
+         containers += stack.get(0);
+      }
+      
+      return containers;
+   }
+   
    void moveCrates(Map<Integer, List<String>> state, String instruction) {
       int fIndex = instruction.indexOf("from");
       int tIndex = instruction.indexOf("to");
@@ -89,5 +114,20 @@ public class Day5 {
       for (int index = 0; index < move; index++) {
          toStack.add(0, fromStack.remove(0));
       }
+   }
+   
+   void moveCrates9001(Map<Integer, List<String>> state, String instruction) {
+      int fIndex = instruction.indexOf("from");
+      int tIndex = instruction.indexOf("to");
+      int move = Integer.parseInt(instruction.substring(5, fIndex).trim());
+      int from = Integer.parseInt(instruction.substring(fIndex + 5, tIndex).trim());
+      int to = Integer.parseInt(instruction.substring(tIndex + 3).trim());
+      
+      List<String> fromStack = state.get(from);
+      List<String> toStack = state.get(to);
+      
+      List<String> moveStack = fromStack.subList(0, move);
+      toStack.addAll(0, moveStack);
+      moveStack.clear();
    }
 }
