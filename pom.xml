@@ -116,18 +116,6 @@
         </plugins>
     </build>
     
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.devlambda</groupId>
-                <artifactId>project-meta</artifactId>
-                <version>${devlambda-meta.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    
     <dependencies>
         <dependency>
             <groupId>com.opencsv</groupId>
@@ -139,6 +127,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
