@@ -16,4 +16,9 @@ class Day7Test {
       System.out.println(day7.part1());
    }
 
+   @Test
+   void testPart2() throws IOException, URISyntaxException {
+      System.out.println(day7.part2());
+   }
+
 }

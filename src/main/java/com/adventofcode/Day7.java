@@ -67,6 +67,33 @@ public class Day7 {
    }
    
    public long part1() throws IOException, URISyntaxException {
+      Set<Directory> directories = build();
+      
+      return directories.stream()
+            .map(this::calculateSize)
+            .filter(size -> size < 100000)
+            .reduce(0L, Math::addExact);
+   }
+   
+   public long part2() throws IOException, URISyntaxException {
+      Set<Directory> directories = build();
+      Directory root = directories.iterator().next();
+      //get root
+      while (root.parent != null) {
+         root = root.parent;
+      }
+      
+      long available = 70_000_000L - calculateSize(root);
+      long required = 30_000_000L - available;
+      
+      return directories.stream()
+            .mapToLong(this::calculateSize)
+            .filter(size -> size > required)
+            .min()
+            .orElse(0L);
+   }
+   
+   Set<Directory> build() throws IOException, URISyntaxException {
       Directory current = null;
       Set<Directory> directories = new HashSet<>();
       
@@ -81,10 +108,7 @@ public class Day7 {
          }
       }
       
-      return directories.stream()
-            .map(this::calculateSize)
-            .filter(size -> size < 100000)
-            .reduce(0L, Math::addExact);
+      return directories;
    }
    
    Directory build(Directory current, String line) {
