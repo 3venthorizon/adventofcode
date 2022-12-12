@@ -24,52 +24,13 @@ public class Day8 {
    public long part1() throws IOException, URISyntaxException {
       byte[] forrest = growForrest();
       int length = (int) Math.sqrt(forrest.length);
-      long count = (length - 1L) * 4L; //perimeter visible
+      long count = 0;
       
-      for (int rowIndex = 1, rowLimit = length - 1; rowIndex < rowLimit; rowIndex++) {
-         byte ltrMin = forrest[rowIndex * length];
-         byte rtlMin = forrest[rowIndex * length + length - 1];
-         
-         for (int colIndex = 1, colLimit = length - 1; colIndex < colLimit; colIndex++) {
-            byte ltr = forrest[rowIndex * length + colIndex];
-            byte rtl = forrest[rowIndex * length + length - colIndex - 1];
-            
-            if (ltr > ltrMin) {
-               ltrMin = ltr;
-               count++;
-            }
-            
-            if (rtl > rtlMin) {
-               rtlMin = rtl;
-               count++;
-            }
-            
-            if (ltr == TREE_TALLEST && rtl == TREE_TALLEST) break;
-         }
+      for (int index = 0; index < forrest.length; index++) {
+         int row = index / length;
+         int col = index % length;
+         if (isVisible(forrest, index, row, col, length)) count++;
       }
-      
-      for (int colIndex = 1, colLimit = length - 1; colIndex < colLimit; colIndex++) {
-         byte ttbMin = forrest[colIndex];
-         byte bttMin = forrest[length * (length - 1) + colIndex];
-
-         for (int rowIndex = 1, rowLimit = length - 1; rowIndex < rowLimit; rowIndex++) {
-            byte ttb = forrest[rowIndex * length + colIndex];
-            byte btt = forrest[rowIndex * (length - 1) - colIndex];
-            
-            if (ttb > ttbMin) {
-               ttbMin = ttb;
-               count++;
-            }
-            
-            if (btt > bttMin) {
-               bttMin = btt;
-               count++;
-            }
-            
-            if (ttb == TREE_TALLEST && btt == TREE_TALLEST) break;
-         }
-      }
-      
       
       return count;
    }
@@ -94,4 +55,32 @@ public class Day8 {
       if (trees.length / count != count) throw new RuntimeException("Not a square forrest");
       return trees;
    }
+   
+   boolean isVisible(byte[] forrest, int position, int row, int col, int length) {
+      int minRowCount = Math.min(row, length - row);
+      int minColCount = Math.min(col, length - col);
+      int middleCount = Math.min(minRowCount, minColCount);
+      int command = 1 << 1;
+      command += minRowCount < minColCount ? 1 : 0;
+      command <<= 1;
+      
+      return true;
+   }
+   
+   boolean isVisibleRow(byte[] forrest, int position, int row, int col, int length, int direction) {
+      for (int index = row + direction; index >= 0 && index < length; index += direction) {
+         if (forrest[position] <= forrest[index * length + col]) return false;
+      }
+      
+      return true;
+   }
+   
+   boolean isVisibleColumn(byte[] forrest, int position, int row, int col, int length, int direction) {
+      for (int index = col + direction; index >= 0 && index < length; index += direction) {
+         if (forrest[position] <= forrest[row * length + index]) return false;
+      }
+      
+      return true;
+   }
+   
 }
