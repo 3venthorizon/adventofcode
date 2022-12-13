@@ -21,20 +21,6 @@ public class Day8 {
       return new BufferedReader(reader);
    }
    
-   public long part1() throws IOException, URISyntaxException {
-      byte[] forrest = growForrest();
-      int length = (int) Math.sqrt(forrest.length);
-      long count = 0;
-      
-      for (int index = 0; index < forrest.length; index++) {
-         int row = index / length;
-         int col = index % length;
-         if (isVisible(forrest, index, row, col, length)) count++;
-      }
-      
-      return count;
-   }
-   
    byte[] growForrest() throws IOException, URISyntaxException {
       StringBuilder sb = new StringBuilder(99 * 99);
       int count = 0;
@@ -54,6 +40,20 @@ public class Day8 {
       
       if (trees.length / count != count) throw new RuntimeException("Not a square forrest");
       return trees;
+   }
+
+   public long part1() throws IOException, URISyntaxException {
+      byte[] forrest = growForrest();
+      int length = (int) Math.sqrt(forrest.length);
+      long count = 0;
+      
+      for (int index = 0; index < forrest.length; index++) {
+         int row = index / length;
+         int col = index % length;
+         if (isVisible(forrest, index, row, col, length)) count++;
+      }
+      
+      return count;
    }
    
    boolean isVisible(byte[] forrest, int position, int row, int col, int length) {
