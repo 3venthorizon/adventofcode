@@ -59,12 +59,20 @@ public class Day8 {
    boolean isVisible(byte[] forrest, int position, int row, int col, int length) {
       int minRowCount = Math.min(row, length - row);
       int minColCount = Math.min(col, length - col);
-      int middleCount = Math.min(minRowCount, minColCount);
-      int command = 1 << 1;
-      command += minRowCount < minColCount ? 1 : 0;
-      command <<= 1;
       
-      return true;
+      if (minRowCount < minColCount) {
+         if (isVisibleRow(forrest, position, row, col, length, row == minRowCount ? -1 : 1)) return true;
+         if (isVisibleCol(forrest, position, row, col, length, col == minColCount ? -1 : 1)) return true;
+         if (isVisibleCol(forrest, position, row, col, length, col == minColCount ? 1 : -1)) return true;
+         if (isVisibleRow(forrest, position, row, col, length, row == minRowCount ? 1 : -1)) return true;
+      } else {
+         if (isVisibleCol(forrest, position, row, col, length, col == minColCount ? -1 : 1)) return true;
+         if (isVisibleRow(forrest, position, row, col, length, row == minRowCount ? -1 : 1)) return true;
+         if (isVisibleRow(forrest, position, row, col, length, row == minRowCount ? 1 : -1)) return true;
+         if (isVisibleCol(forrest, position, row, col, length, col == minColCount ? 1 : -1)) return true;
+      }
+      
+      return false;
    }
    
    boolean isVisibleRow(byte[] forrest, int position, int row, int col, int length, int direction) {
@@ -75,7 +83,7 @@ public class Day8 {
       return true;
    }
    
-   boolean isVisibleColumn(byte[] forrest, int position, int row, int col, int length, int direction) {
+   boolean isVisibleCol(byte[] forrest, int position, int row, int col, int length, int direction) {
       for (int index = col + direction; index >= 0 && index < length; index += direction) {
          if (forrest[position] <= forrest[row * length + index]) return false;
       }
