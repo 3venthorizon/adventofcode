@@ -90,5 +90,56 @@ public class Day8 {
       
       return true;
    }
+
+   public int part2() throws IOException, URISyntaxException {
+      byte[] forrest = growForrest();
+      int length = (int) Math.sqrt(forrest.length);
+      int max = -1;
+      
+      for (int index = 0; index < forrest.length; index++) {
+         int row = index / length;
+         int col = index % length;
+         
+         max = Math.max(max, scenicScore(forrest, index, row, col, length));
+      }
+      
+      return max;
+   }
    
+   int scenicScore(byte[] forrest, int position, int row, int col, int length) {
+      int score = 1;
+      int west = scoreRow(forrest, position, row, col, length, -1);
+      int east = scoreRow(forrest, position, row, col, length, 1);
+      int north = scoreCol(forrest, position, row, col, length, -1);
+      int south = scoreCol(forrest, position, row, col, length, 1);
+      
+      if (west > 0) score *= west;
+      if (east > 0) score *= east;
+      if (north > 0) score *= north;
+      if (south > 0) score *= south;
+      
+      return score;
+   }
+   
+   int scoreRow(byte[] forrest, int position, int row, int col, int length, int direction) {
+      int score = 0;
+      
+      for (int index = row + direction; index >= 0 && index < length; index += direction) {
+         score++;
+         if (forrest[position] <= forrest[index * length + col]) return score;
+      }
+      
+      return score;
+   }
+   
+   int scoreCol(byte[] forrest, int position, int row, int col, int length, int direction) {
+      int score = 0;
+      
+      for (int index = col + direction; index >= 0 && index < length; index += direction) {
+         score++;
+         if (forrest[position] <= forrest[row * length + index]) return score;
+      }
+      
+      return score;
+   }
 }
