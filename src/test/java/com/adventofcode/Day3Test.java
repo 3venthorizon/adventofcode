@@ -8,17 +8,16 @@ import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 
 class Day3Test {
-
-   Day3 day3 = new Day3();
+   Day3 test = new Day3();
    
    @Test
    void testPart1() throws IOException, URISyntaxException {
-      System.out.println(day3.part1());
+      System.out.println(test.part1());
    }
 
    @Test
    void testPart2() throws IOException, URISyntaxException {
-      System.out.println(day3.part2());
+      System.out.println(test.part2());
    }
 
 }

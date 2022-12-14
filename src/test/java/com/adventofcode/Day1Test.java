@@ -8,17 +8,16 @@ import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 
 class Day1Test {
-
-   Day1 day1 = new Day1();
+   Day1 test = new Day1();
    
    @Test
    void testMaxSum() throws IOException, URISyntaxException {
-      System.out.println(day1.maxSum());
+      System.out.println(test.maxSum());
    }
    
    @Test
    void testTop3Sum() throws IOException, URISyntaxException {
-      System.out.println(day1.top3Sum());
+      System.out.println(test.top3Sum());
    }
 
 }
