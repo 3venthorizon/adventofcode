@@ -1,4 +1,4 @@
-package com.adventofcode;
+package com.adventofcode.y2022;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,12 +7,14 @@ import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
 
-class Day10Test {
-   Day10 test = new Day10();
+import com.adventofcode.y2022.Day12;
 
+class Day12Test {
+   Day12 test = new Day12();
+   
    @Test
    void testPart1() throws IOException, URISyntaxException {
-      System.out.println(test.part1());
+      test.part1();
    }
 
 }

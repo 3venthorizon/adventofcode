@@ -1,4 +1,4 @@
-package com.adventofcode;
+package com.adventofcode.y2022;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

@@ -1,9 +1,11 @@
-package com.adventofcode;
+package com.adventofcode.y2022;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import com.adventofcode.y2022.Day11;
 
 class Day11Test {
    Day11 test = new Day11();

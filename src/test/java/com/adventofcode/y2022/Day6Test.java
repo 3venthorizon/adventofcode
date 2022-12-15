@@ -1,10 +1,12 @@
-package com.adventofcode;
+package com.adventofcode.y2022;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+
+import com.adventofcode.y2022.Day6;
 
 class Day6Test {
    Day6 test = new Day6();

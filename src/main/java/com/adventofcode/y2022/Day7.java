@@ -1,4 +1,4 @@
-package com.adventofcode;
+package com.adventofcode.y2022;
 
 import java.io.BufferedReader;
 import java.io.IOException;
