@@ -7,8 +7,6 @@ import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
 
-import com.adventofcode.y2022.Day8;
-
 class Day8Test {
    Day8 test = new Day8();
 

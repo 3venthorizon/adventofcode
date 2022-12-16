@@ -7,13 +7,17 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import com.opencsv.stream.reader.LineReader;
 
@@ -53,27 +57,30 @@ public class Day12 {
       return sb.toString().getBytes();
    }
    
-   Map<Byte, List<Integer>> topoMap(byte[] grid) {
+   Map<Byte, List<Integer>> beaconMap(byte[] grid) {
       Map<Byte, List<Integer>> topoMap = IntStream.range('a', 'z').boxed()
             .collect(Collectors.toMap(Integer::byteValue, ArrayList::new));
       
       for (int index = 0; index < grid.length; index++) {
          if (grid[index] == 'z') continue;
          
-         try {
-            List<Integer> boundaries = boundaries(grid, index);
-            topoMap.get(grid[index]).addAll(boundaries);
-         } catch (Exception e) {
-            System.out.println(grid[index]);
-            e.printStackTrace();
-         }
+         List<Integer> boundaries = boundaries(grid, index);
+         topoMap.get(grid[index]).addAll(boundaries);
       }
       
       return topoMap;
    }
    
    List<Integer> boundaries(byte[] grid, int index) {
-      List<Integer> boundaries = new ArrayList<>();
+      List<Integer> boundaries = options(grid, index);
+      boundaries.removeIf(boundary -> grid[boundary] == grid[index]);
+      
+      return boundaries;
+   }
+   
+   List<Integer> options(byte[] grid, int index) {
+      List<Integer> options = new ArrayList<>();
+      
       int x = index % width;
       int y = index / width;
       int north = (y - 1) * width + x;
@@ -82,20 +89,69 @@ public class Day12 {
       int east = y * width + (x + 1);
       //find step + 1
       int step = grid[index] + 1; //next level
-      if (north > 0 && step == grid[north]) boundaries.add(north);
-      if (south < grid.length && step == grid[south]) boundaries.add(south);
-      if (x > 0 && step == grid[west]) boundaries.add(west);
-      if (x < width - 1 && step == grid[east]) boundaries.add(east);
+      if (north > 0 && Math.abs(step - grid[north]) <= 1) options.add(north);
+      if (south < grid.length && Math.abs(step - grid[south]) <= 1) options.add(south);
+      if (x > 0 && Math.abs(step - grid[west]) <= 1) options.add(west);
+      if (x < width - 1 && Math.abs(step - grid[east]) <= 1) options.add(east);
       
-      return boundaries;
+      return options;
+   }
+   
+   int distance(int left, int right) {
+      int lx = left % width;
+      int ly = left / width;
+      int rx = right % width;
+      int ry = right / width;
+      
+      return Math.abs(lx - rx) + Math.abs(ly - ry);
    }
    
    public int part1() throws IOException, URISyntaxException {
       byte[] grid = loadGrid();
       grid[start] = 'a';
       grid[end] = 'z';
-      Map<Byte, List<Integer>> topoMap = topoMap(grid);
+      Map<Byte, List<Integer>> beaconMap = beaconMap(grid);
+      HashMap<Integer, List<Integer>> optionsMap = new LinkedHashMap<>();
+      Set<Integer> deadends = new HashSet<>();
+      Deque<Integer> trail = new ArrayDeque<>();
+      
+      pathFinder(grid, beaconMap, start, trail, optionsMap, deadends);
       
       return 0;
+   }
+   
+   void pathFinder(byte[] grid, Map<Byte, List<Integer>> beaconMap, int location,
+         Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
+      while (location != end) {
+         location = move(grid, beaconMap, location, trail, optionsMap, deadends);
+      }
+   }
+   
+   /**
+    * @param grid
+    * @param beaconMap
+    * @param location
+    * @param trail
+    * @param optionsMap
+    * @param deadends
+    * @return new location
+    */
+   int move(byte[] grid, Map<Byte, List<Integer>> beaconMap, int location,
+         Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
+      List<Integer> options = options(grid, location);
+      
+      options.removeAll(deadends);
+      options.remove(trail.peek());
+      
+      if (options.isEmpty()) {
+         deadends.add(location);
+         return trail.pop();
+      }
+      
+      return 0;
+   }
+   
+   void backtrack() {
+      
    }
 }
