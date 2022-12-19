@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,10 +23,14 @@ import java.util.stream.IntStream;
 import com.opencsv.stream.reader.LineReader;
 
 public class Day12 {
+   
    int start = 0;
    int end = 0;
    int width = 0;
    int height = 0;
+   byte[] grid;
+   Map<Byte, List<Integer>> beaconMap;
+   Comparator<Integer> distanceCmp;
 
    BufferedReader createReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
@@ -34,7 +39,7 @@ public class Day12 {
       return new BufferedReader(reader);
    }
    
-   byte[] loadGrid() throws IOException, URISyntaxException {
+   void loadGrid() throws IOException, URISyntaxException {
       StringBuilder sb = new StringBuilder();
       
       try (BufferedReader reader = createReader()) {
@@ -54,7 +59,7 @@ public class Day12 {
          }
       }
       
-      return sb.toString().getBytes();
+      grid = sb.toString().getBytes();
    }
    
    Map<Byte, List<Integer>> beaconMap(byte[] grid) {
@@ -107,51 +112,50 @@ public class Day12 {
    }
    
    public int part1() throws IOException, URISyntaxException {
-      byte[] grid = loadGrid();
+      loadGrid();
       grid[start] = 'a';
       grid[end] = 'z';
-      Map<Byte, List<Integer>> beaconMap = beaconMap(grid);
+      beaconMap = beaconMap(grid);
       HashMap<Integer, List<Integer>> optionsMap = new LinkedHashMap<>();
       Set<Integer> deadends = new HashSet<>();
       Deque<Integer> trail = new ArrayDeque<>();
       
-      pathFinder(grid, beaconMap, start, trail, optionsMap, deadends);
+      pathFinder(start, trail, optionsMap, deadends);
       
       return 0;
    }
    
-   void pathFinder(byte[] grid, Map<Byte, List<Integer>> beaconMap, int location,
-         Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
+   void pathFinder(int location, Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
       while (location != end) {
-         location = move(grid, beaconMap, location, trail, optionsMap, deadends);
+         location = move(location, trail, optionsMap, deadends);
+         if (location == start) break; //no solution found
       }
    }
    
-   /**
-    * @param grid
-    * @param beaconMap
-    * @param location
-    * @param trail
-    * @param optionsMap
-    * @param deadends
-    * @return new location
-    */
-   int move(byte[] grid, Map<Byte, List<Integer>> beaconMap, int location,
-         Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
+   int move(int location, Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
       List<Integer> options = options(grid, location);
-      
       options.removeAll(deadends);
       options.remove(trail.peek());
       
-      if (options.isEmpty()) {
-         deadends.add(location);
-         return trail.pop();
-      }
+      if (options.isEmpty()) return backtrack(location, trail, optionsMap, deadends);
+      
+      Comparator<Integer> rank = Comparator.comparingInt(destination -> distance(end, destination));
       
       return 0;
    }
    
-   void backtrack() {
+   int backtrack(int location, Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
+      deadends.add(location);
       
+      while (!trail.isEmpty()) {
+         Integer backtrack = trail.pop();
+         List<Integer> options = optionsMap.get(backtrack);
+         if (!options.isEmpty()) return options.remove(0);
+         
+         deadends.add(backtrack);
+         optionsMap.remove(backtrack);
+      }
+      
+      return start; //unlikely
    }
 }
