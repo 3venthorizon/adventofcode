@@ -23,7 +23,7 @@ public class Day1 {
     */
    public long maxSum() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
-      URL resource = classLoader.getResource("day1.input");
+      URL resource = classLoader.getResource("2022/day1.input");
       Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
       long sum = 0L;
       long max = -1L;
@@ -58,7 +58,7 @@ public class Day1 {
     */
    public long top3Sum() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
-      URL resource = classLoader.getResource("day1.input");
+      URL resource = classLoader.getResource("2022/day1.input");
       Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
       long sum = 0L;
       List<Long> top3 = new ArrayList<>();

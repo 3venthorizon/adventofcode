@@ -10,7 +10,7 @@ public class Day6 {
       ClassLoader classLoader = getClass().getClassLoader();
       byte[] buffer = new byte[count]; //cyclic buffer
       
-      try (InputStream is = classLoader.getResourceAsStream("day6.input")) {
+      try (InputStream is = classLoader.getResourceAsStream("2022/day6.input")) {
          int read = -1;
          while (position < buffer.length) {
             read = is.read(buffer, position, buffer.length - position);

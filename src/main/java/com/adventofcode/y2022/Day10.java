@@ -24,7 +24,7 @@ public class Day10 {
 
    BufferedReader createReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
-      URL resource = classLoader.getResource("day10.input");
+      URL resource = classLoader.getResource("2022/day10.input");
       Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
       return new BufferedReader(reader);
    }

@@ -95,7 +95,7 @@ public class Day2 {
 
    CSVReader createCsvReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
-      URL resource = classLoader.getResource("day2.input");
+      URL resource = classLoader.getResource("2022/day2.input");
       Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
       return new CSVReader(reader);
    }

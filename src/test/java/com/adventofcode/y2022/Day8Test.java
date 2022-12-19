@@ -1,7 +1,5 @@
 package com.adventofcode.y2022;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 
