@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.opencsv.stream.reader.LineReader;
 
 public class Day13 {
-   
    static final ObjectMapper MAPPER = new ObjectMapper();
    
    BufferedReader createReader() throws IOException, URISyntaxException {

@@ -76,7 +76,7 @@ public class Day10 {
    }
    
    void crt(State state) {
-      char pixel = (Math.abs(((state.cycles - 1) % 40) - state.x) <= 1) ? '#' : '.';
+      char pixel = (Math.abs(((state.cycles - 1) % 40) - state.x) <= 1) ? '#' : ' ';
       System.out.print(pixel);
       if (state.cycles % 40 == 0) System.out.println();
    }
