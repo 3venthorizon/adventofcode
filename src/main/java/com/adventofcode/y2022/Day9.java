@@ -36,8 +36,7 @@ public class Day9 {
    }
    
    static class Coordinate {
-      int x;
-      int y;
+      int x, y;
       
       Coordinate(int x, int y) {
          this.x = x;

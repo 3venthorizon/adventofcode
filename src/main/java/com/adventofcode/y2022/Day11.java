@@ -13,7 +13,7 @@ public class Day11 {
       final List<Long> items = new ArrayList<>();
       final UnaryOperator<Long> operation;
       final Function<Long, Integer> test;
-      Long inspections = 0L;
+      long inspections = 0L;
       
       Monkey(UnaryOperator<Long> operation, Function<Long, Integer> test) {
          this.operation = operation;
@@ -95,7 +95,7 @@ public class Day11 {
       monkey.items.stream()
             .map(monkey.operation) //inspects
             .map(relief) //item is not broken
-            .forEach(item -> monkeys.get(monkey.test.apply(item).intValue()).items.add(item));
+            .forEach(item -> monkeys.get(monkey.test.apply(item)).items.add(item));
       monkey.items.clear();
    }
 }
