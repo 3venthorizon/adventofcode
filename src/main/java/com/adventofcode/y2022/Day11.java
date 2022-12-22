@@ -69,7 +69,8 @@ public class Day11 {
    
    public long part2() {
       init();
-      UnaryOperator<Long> norelief = value -> value % 9699690;
+      int divisor = 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19;
+      UnaryOperator<Long> norelief = value -> value % divisor;
       
       for (int round = 0; round < 10_000; round++) {
          monkeys.forEach(monkey -> inspect(monkey, norelief));
