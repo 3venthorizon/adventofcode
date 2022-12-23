@@ -7,18 +7,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.opencsv.stream.reader.LineReader;
 
@@ -29,8 +23,6 @@ public class Day12 {
    int width = 0;
    int height = 0;
    byte[] grid;
-   Map<Byte, List<Integer>> beaconMap;
-   Comparator<Integer> distanceCmp;
 
    BufferedReader createReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
@@ -62,28 +54,7 @@ public class Day12 {
       grid = sb.toString().getBytes();
    }
    
-   Map<Byte, List<Integer>> beaconMap(byte[] grid) {
-      Map<Byte, List<Integer>> topoMap = IntStream.range('a', 'z').boxed()
-            .collect(Collectors.toMap(Integer::byteValue, ArrayList::new));
-      
-      for (int index = 0; index < grid.length; index++) {
-         if (grid[index] == 'z') continue;
-         
-         List<Integer> boundaries = boundaries(grid, index);
-         topoMap.get(grid[index]).addAll(boundaries);
-      }
-      
-      return topoMap;
-   }
-   
-   List<Integer> boundaries(byte[] grid, int index) {
-      List<Integer> boundaries = options(grid, index);
-      boundaries.removeIf(boundary -> grid[boundary] == grid[index]);
-      
-      return boundaries;
-   }
-   
-   List<Integer> options(byte[] grid, int index) {
+   List<Integer> options(int index) {
       List<Integer> options = new ArrayList<>();
       
       int x = index % width;
@@ -92,70 +63,118 @@ public class Day12 {
       int south = (y + 1) * width + x;
       int west = y * width + (x - 1);
       int east = y * width + (x + 1);
-      //find step + 1
-      int step = grid[index] + 1; //next level
-      if (north > 0 && Math.abs(step - grid[north]) <= 1) options.add(north);
-      if (south < grid.length && Math.abs(step - grid[south]) <= 1) options.add(south);
-      if (x > 0 && Math.abs(step - grid[west]) <= 1) options.add(west);
-      if (x < width - 1 && Math.abs(step - grid[east]) <= 1) options.add(east);
+      
+      if (north > 0           && grid[north] - grid[index] <= 1) options.add(north);
+      if (south < grid.length && grid[south] - grid[index] <= 1) options.add(south);
+      if (x > 0               && grid[west] - grid[index] <= 1) options.add(west);
+      if (x < width - 1       && grid[east] - grid[index] <= 1) options.add(east);
       
       return options;
    }
    
-   int distance(int left, int right) {
-      int lx = left % width;
-      int ly = left / width;
-      int rx = right % width;
-      int ry = right / width;
+   List<Integer> topoMap() {
+      List<Integer> topoMap = new ArrayList<>();
       
-      return Math.abs(lx - rx) + Math.abs(ly - ry);
+      for (int index = 0; index < grid.length; index++) {
+         if (grid[index] != 'a') continue;
+         
+         final int idx = index;
+         List<Integer> boundaries = options(idx);
+         boundaries.removeIf(boundary -> grid[boundary] == grid[idx]);
+         topoMap.addAll(boundaries);
+      }
+      
+      return topoMap;
    }
    
    public int part1() throws IOException, URISyntaxException {
       loadGrid();
       grid[start] = 'a';
       grid[end] = 'z';
-      beaconMap = beaconMap(grid);
-      HashMap<Integer, List<Integer>> optionsMap = new LinkedHashMap<>();
-      Set<Integer> deadends = new HashSet<>();
-      Deque<Integer> trail = new ArrayDeque<>();
       
-      pathFinder(start, trail, optionsMap, deadends);
+      Map<Integer, Integer> routeMap = new HashMap<>();
+      routeMap.put(start, -1);
+      List<Integer> options = options(start);
+      Map<Integer, Integer> optionsMap = options.stream()
+            .collect(Collectors.toMap(Function.identity(), option -> start));
       
-      return 0;
+      pathFinder(optionsMap, routeMap);
+      
+      List<Integer> traceRoute = trace(routeMap);
+      printGrid();
+      
+      return traceRoute.size();
    }
    
-   void pathFinder(int location, Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
-      while (location != end) {
-         location = move(location, trail, optionsMap, deadends);
-         if (location == start) break; //no solution found
-      }
-   }
-   
-   int move(int location, Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
-      List<Integer> options = options(grid, location);
-      options.removeAll(deadends);
-      options.remove(trail.peek());
+   void pathFinder(Map<Integer, Integer> optionsMap, Map<Integer, Integer> route) {
+      Map<Integer, Integer> nextMap = new HashMap<>();
       
-      if (options.isEmpty()) return backtrack(location, trail, optionsMap, deadends);
-      
-      Comparator<Integer> rank = Comparator.comparingInt(destination -> distance(end, destination));
-      
-      return 0;
-   }
-   
-   int backtrack(int location, Deque<Integer> trail, Map<Integer, List<Integer>> optionsMap, Set<Integer> deadends) {
-      deadends.add(location);
-      
-      while (!trail.isEmpty()) {
-         Integer backtrack = trail.pop();
-         List<Integer> options = optionsMap.get(backtrack);
-         if (!options.isEmpty()) return options.remove(0);
+      for (Map.Entry<Integer, Integer> entry : optionsMap.entrySet()) {
+         Integer option = entry.getKey();
+         Integer existing = route.putIfAbsent(option, entry.getValue());
          
-         deadends.add(backtrack);
-         optionsMap.remove(backtrack);
+         if (existing != null) continue;
+         if (end == option.intValue()) return;
+         
+         List<Integer> options = options(option);
+         options.forEach(next -> nextMap.putIfAbsent(next, option));
       }
       
-      return start; //unlikely
+      if (nextMap.isEmpty()) return;
+      pathFinder(nextMap, route);
+   }
+   
+   List<Integer> trace(Map<Integer, Integer> routeMap) {
+      List<Integer> trace = new ArrayList<>();
+      Integer source = routeMap.get(end);
+      
+      while (source != null && source != -1) {
+         grid[source] = '$';
+         trace.add(0, source);
+         source = routeMap.get(source);
+      }
+      
+      return trace;
+   }
+   
+   void printGrid() {
+      System.out.println();
+      for (int offset = 0; offset < grid.length; offset += width) {
+         System.out.println(new String(grid, offset, width));
+      }
+      System.out.println();
+   }
+   
+   public int part2() throws IOException, URISyntaxException {
+      loadGrid();
+      grid[end] = 'z';
+      byte[] backup = new byte[grid.length];
+      System.arraycopy(grid, 0, backup, 0, grid.length);
+      
+      int min = Integer.MAX_VALUE;
+      List<Integer> scene = topoMap();
+      
+      for (Integer a : scene) {
+         System.arraycopy(backup, 0, grid, 0, grid.length);
+         
+         Map<Integer, Integer> routeMap = new HashMap<>();
+         routeMap.put(a, -1);
+         List<Integer> options = options(a);
+         Map<Integer, Integer> optionsMap = options.stream()
+               .collect(Collectors.toMap(Function.identity(), option -> a));
+         
+         pathFinder(optionsMap, routeMap);
+         
+         List<Integer> traceRoute = trace(routeMap);
+         if (traceRoute.isEmpty()) continue;
+         min = Math.min(min, traceRoute.size());
+         
+         if (min == traceRoute.size()) {
+            printGrid();
+            System.out.println("Trace Route: " + min);
+         }
+      }
+      
+      return min;
    }
 }
