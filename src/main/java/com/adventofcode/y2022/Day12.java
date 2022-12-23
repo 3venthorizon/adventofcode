@@ -9,8 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,8 +74,8 @@ public class Day12 {
       return options;
    }
    
-   List<Integer> topoMap() {
-      List<Integer> topoMap = new ArrayList<>();
+   Set<Integer> topoMap() {
+      Set<Integer> topoMap = new HashSet<>();
       
       for (int index = 0; index < grid.length; index++) {
          if (grid[index] != 'a') continue;
@@ -81,7 +83,8 @@ public class Day12 {
          final int idx = index;
          List<Integer> boundaries = options(idx);
          boundaries.removeIf(boundary -> grid[boundary] == grid[idx]);
-         topoMap.addAll(boundaries);
+         
+         if (!boundaries.isEmpty()) topoMap.add(index);
       }
       
       return topoMap;
@@ -129,7 +132,7 @@ public class Day12 {
       Integer source = routeMap.get(end);
       
       while (source != null && source != -1) {
-         grid[source] = '$';
+         grid[source] = (byte) Character.toUpperCase(grid[source]);
          trace.add(0, source);
          source = routeMap.get(source);
       }
@@ -152,7 +155,7 @@ public class Day12 {
       System.arraycopy(grid, 0, backup, 0, grid.length);
       
       int min = Integer.MAX_VALUE;
-      List<Integer> scene = topoMap();
+      Set<Integer> scene = topoMap();
       
       for (Integer a : scene) {
          System.arraycopy(backup, 0, grid, 0, grid.length);
@@ -168,12 +171,9 @@ public class Day12 {
          List<Integer> traceRoute = trace(routeMap);
          if (traceRoute.isEmpty()) continue;
          min = Math.min(min, traceRoute.size());
-         
-         if (min == traceRoute.size()) {
-            printGrid();
-            System.out.println("Trace Route: " + min);
-         }
       }
+      
+      printGrid();
       
       return min;
    }

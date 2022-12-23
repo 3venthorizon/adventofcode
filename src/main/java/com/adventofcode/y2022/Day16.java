@@ -102,13 +102,10 @@ public class Day16 {
       
       for (Map.Entry<Valve, Valve> entry : breadthMap.entrySet()) {
          Valve breadth = entry.getKey();
+         Valve existing = route.putIfAbsent(destination, entry.getValue());
          
-         if (destination.equals(breadth)) {
-            route.put(destination, entry.getValue());
-            break;
-         }
-         
-         if (route.containsKey(breadth)) continue;
+         if (existing != null) continue;
+         if (destination.equals(breadth)) break;
          
          breadth.tunnels.stream().map(map::get).forEach(next -> nextMap.put(next, breadth));
       }
