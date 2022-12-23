@@ -68,8 +68,8 @@ public class Day12 {
       
       if (north > 0           && grid[north] - grid[index] <= 1) options.add(north);
       if (south < grid.length && grid[south] - grid[index] <= 1) options.add(south);
-      if (x > 0               && grid[west] - grid[index] <= 1) options.add(west);
-      if (x < width - 1       && grid[east] - grid[index] <= 1) options.add(east);
+      if (x > 0               && grid[west]  - grid[index] <= 1) options.add(west);
+      if (x < width - 1       && grid[east]  - grid[index] <= 1) options.add(east);
       
       return options;
    }
