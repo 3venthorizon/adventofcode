@@ -137,6 +137,12 @@ public class Day12 {
          source = routeMap.get(source);
       }
       
+      if (!trace.isEmpty()) {
+         grid[end] = (byte) Character.toUpperCase(grid[end]);
+         trace.add(end);
+         trace.remove(0); //don't count the start position.
+      }
+      
       return trace;
    }
    

@@ -7,10 +7,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.opencsv.stream.reader.LineReader;
 
@@ -83,34 +87,55 @@ public class Day16 {
    }
 
    public int part1() throws IOException, URISyntaxException {
-      String location = "AA";
       Map<String, Valve> map = loadMap();
       List<Valve> flowRankList = map.values().stream()
             .filter(valve -> valve.flowrate > 0)
             .sorted((left, right) -> Integer.compare(right.flowrate, left.flowrate)).toList();
-      Map<String, String> dsMap = new HashMap<>();
+      Valve start = map.get("AA");
+      Map<String, String> dsMap = start.tunnels.stream()
+            .collect(Collectors.toMap(Function.identity(), tunnel -> "AA"));
       
       for (Valve rank : flowRankList) {
+         Map<String, String> route = new HashMap<>();
+         route.put("AA", "AA");
+         List<String> trace = breadthFirstSearch(rank.name, dsMap, route, map);
+         System.out.println(rank.name + "(" + rank.flowrate + ")\t" + trace);
       }
       
       return 0;
    }
    
-   void breadthFirstSearch(Valve destination, Map<Valve, Valve> breadthMap, 
-         Map<Valve, Valve> route, Map<String, Valve> map) {
-      Map<Valve, Valve> nextMap = new HashMap<>();
+   List<String> breadthFirstSearch(String destination, Map<String, String> breadthMap, Map<String, String> route, 
+         Map<String, Valve> legend) {
+      Map<String, String> nextMap = new HashMap<>();
       
-      for (Map.Entry<Valve, Valve> entry : breadthMap.entrySet()) {
-         Valve breadth = entry.getKey();
-         Valve existing = route.putIfAbsent(destination, entry.getValue());
+      for (Map.Entry<String, String> entry : breadthMap.entrySet()) {
+         String breadth = entry.getKey();
+         String existing = route.putIfAbsent(breadth, entry.getValue());
          
          if (existing != null) continue;
-         if (destination.equals(breadth)) break;
+         if (destination.equals(breadth)) return trace(route, destination);
          
-         breadth.tunnels.stream().map(map::get).forEach(next -> nextMap.put(next, breadth));
+         Valve valve = legend.get(breadth);
+         valve.tunnels.stream().forEach(next -> nextMap.putIfAbsent(next, breadth));
       }
    
-      if (nextMap.isEmpty()) return;
-      breadthFirstSearch(destination, nextMap, route, map);
+      if (nextMap.isEmpty()) return Collections.emptyList();
+      return breadthFirstSearch(destination, nextMap, route, legend);
+   }
+   
+   List<String> trace(Map<String, String> route, String destination) {
+      List<String> trace = new ArrayList<>();
+      String source = route.get(destination);
+      
+      if (source != null && source != destination) trace.add(destination);
+
+      while (source != null && source != destination) {
+         trace.add(0, source);
+         destination = source;
+         source = route.get(destination);
+      }
+      
+      return trace;
    }
 }
