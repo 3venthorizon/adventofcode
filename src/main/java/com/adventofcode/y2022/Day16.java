@@ -127,8 +127,9 @@ public class Day16 {
    List<String> trace(Map<String, String> route, String destination) {
       List<String> trace = new ArrayList<>();
       String source = route.get(destination);
-      
-      if (source != null && source != destination) trace.add(destination);
+      if (source == null || source == destination) return trace;
+         
+      trace.add(destination);
 
       while (source != null && source != destination) {
          trace.add(0, source);
@@ -136,6 +137,11 @@ public class Day16 {
          source = route.get(destination);
       }
       
+      trace.remove(0); //remove the origin
       return trace;
+   }
+   
+   int score(int total, List<String> route, String destination, Map<String, Valve> legend) {
+      return 0;
    }
 }
