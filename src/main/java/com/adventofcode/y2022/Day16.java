@@ -24,6 +24,8 @@ public class Day16 {
    static final String MARKER_TUNNELS = "valve";
    static final String DELIMITER = ", ";
    
+   static final int MINUTES = 30;
+   
    static class Valve {
       final String name;
       final int flowrate;
@@ -56,7 +58,7 @@ public class Day16 {
    
    BufferedReader createReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
-      URL resource = classLoader.getResource("2022/day16.input");
+      URL resource = classLoader.getResource("2022/day16.test");
       Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
       return new BufferedReader(reader);
    }
@@ -87,61 +89,140 @@ public class Day16 {
    }
 
    public int part1() throws IOException, URISyntaxException {
-      Map<String, Valve> map = loadMap();
-      List<Valve> flowRankList = map.values().stream()
+      Map<String, Valve> legend = loadMap();
+      List<Valve> flowRankList = legend.values().stream()
             .filter(valve -> valve.flowrate > 0)
-            .sorted((left, right) -> Integer.compare(right.flowrate, left.flowrate)).toList();
-      Valve start = map.get("AA");
-      Map<String, String> dsMap = start.tunnels.stream()
-            .collect(Collectors.toMap(Function.identity(), tunnel -> "AA"));
+            .sorted((left, right) -> Integer.compare(right.flowrate, left.flowrate))
+            .toList();
+      Map<String, List<String>> valveRouteMap = flowRankList.stream()
+            .collect(Collectors.toMap(valve -> valve.name, valve -> new ArrayList<>()));
+      List<String> route = new ArrayList<>();
+      route.add("AA");
+      valveRouteMap.put("AA", Collections.emptyList());
       
-      for (Valve rank : flowRankList) {
-         Map<String, String> route = new HashMap<>();
-         route.put("AA", "AA");
-         List<String> trace = breadthFirstSearch(rank.name, dsMap, route, map);
-         System.out.println(rank.name + "(" + rank.flowrate + ")\t" + trace);
-      }
-      
-      return 0;
+      return route(route, valveRouteMap, legend);
    }
    
-   List<String> breadthFirstSearch(String destination, Map<String, String> breadthMap, Map<String, String> route, 
+   int route(List<String> route, Map<String, List<String>> valveRouteMap, Map<String, Valve> legend) {
+      List<String> openValves = new ArrayList<>(route);
+      List<String> unexplored = new ArrayList<>(valveRouteMap.keySet());
+      
+      openValves.retainAll(valveRouteMap.keySet());
+      unexplored.removeAll(route);
+
+      int score = score(openValves, valveRouteMap, legend);
+      int minutes = valveRouteMap.values().stream()
+            .mapToInt(List::size)
+            .sum();
+      String best = null;
+      List<String> bestRoute = null;
+      Map<String, List<String>> bestRouteMap = null;
+      
+      for (String explore : unexplored) {
+         for (int index = 1, count = openValves.size(); index <= count; index++) {
+            List<String> traceRoute = route(openValves.get(index - 1), explore, legend);
+            if (minutes + traceRoute.size() > MINUTES) continue;
+            
+            List<String> detour = new ArrayList<>(openValves);
+            Map<String, List<String>> detourRouteMap = new HashMap<>(valveRouteMap);
+
+            detour.add(index, explore);
+            detourRouteMap.put(explore, traceRoute);
+            
+            //re-route
+            if (index < count) { 
+               List<String> reRoute = route(explore, openValves.get(index), legend);
+               List<String> oldRoute = detourRouteMap.put(openValves.get(index), reRoute);
+               
+               if (minutes - oldRoute.size() + reRoute.size() + traceRoute.size() > MINUTES) continue;
+            }
+            
+            int detourScore = score(detour, detourRouteMap, legend);
+            if (detourScore <= score) continue;
+            
+            score = detourScore;
+            best = explore;
+            bestRoute = detour;
+            bestRouteMap = detourRouteMap;
+         }
+      }
+      
+      if (best == null) return score;
+
+      return route(bestRoute, bestRouteMap, legend);
+   }
+   
+   List<String> route(String departure, String destination, Map<String, Valve> legend) {
+      Valve start = legend.get(departure);
+      Map<String, String> searchMap = start.tunnels.stream()
+            .collect(Collectors.toMap(Function.identity(), tunnel -> departure));
+      Map<String, String> routeMap = new HashMap<>();
+      routeMap.put(departure, departure);
+      
+      return breadthFirstSearch(destination, searchMap, routeMap, legend);
+   }
+   
+   List<String> breadthFirstSearch(String destination, Map<String, String> searchMap, Map<String, String> routeMap, 
          Map<String, Valve> legend) {
       Map<String, String> nextMap = new HashMap<>();
       
-      for (Map.Entry<String, String> entry : breadthMap.entrySet()) {
+      for (Map.Entry<String, String> entry : searchMap.entrySet()) {
          String breadth = entry.getKey();
-         String existing = route.putIfAbsent(breadth, entry.getValue());
+         String existing = routeMap.putIfAbsent(breadth, entry.getValue());
          
          if (existing != null) continue;
-         if (destination.equals(breadth)) return trace(route, destination);
+         if (destination.equals(breadth)) return traceRoute(routeMap, destination);
          
          Valve valve = legend.get(breadth);
          valve.tunnels.stream().forEach(next -> nextMap.putIfAbsent(next, breadth));
       }
    
       if (nextMap.isEmpty()) return Collections.emptyList();
-      return breadthFirstSearch(destination, nextMap, route, legend);
+      return breadthFirstSearch(destination, nextMap, routeMap, legend);
    }
    
-   List<String> trace(Map<String, String> route, String destination) {
+   List<String> traceRoute(Map<String, String> routeMap, String destination) {
+      String source = routeMap.get(destination);
       List<String> trace = new ArrayList<>();
-      String source = route.get(destination);
-      if (source == null || source == destination) return trace;
-         
       trace.add(destination);
 
       while (source != null && source != destination) {
          trace.add(0, source);
          destination = source;
-         source = route.get(destination);
+         source = routeMap.get(destination);
       }
       
-      trace.remove(0); //remove the origin
       return trace;
    }
    
-   int score(int total, List<String> route, String destination, Map<String, Valve> legend) {
-      return 0;
+   int score(List<String> openValves, Map<String, List<String>> valveRouteMap, Map<String, Valve> legend) {
+      int minutes = 0;
+      int score = 0;
+      
+      for (String opened : openValves) {
+         List<String> route = valveRouteMap.get(opened);
+         minutes += route.size();
+         Valve valve = legend.get(opened);
+         score += (MINUTES - minutes) * valve.flowrate;
+      }
+      
+      return score;
+   }
+   
+   void printRouteScore(List<String> openValves, Map<String, List<String>> valveRouteMap, Map<String, Valve> legend) {
+      int minutes = 0;
+      int score = 0;
+      
+      for (String opened : openValves) {
+         List<String> route = valveRouteMap.get(opened);
+         minutes += route.size();
+         Valve valve = legend.get(opened);
+         int pressure = (MINUTES - minutes) * valve.flowrate;
+         score += pressure;
+
+         System.out.println(opened + " Pressure: " + pressure + "\t" + route);
+      }
+      
+      System.out.println("Total Pressure: " + score);
    }
 }
