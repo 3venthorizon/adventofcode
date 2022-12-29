@@ -13,8 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.opencsv.stream.reader.LineReader;
 
@@ -97,11 +95,8 @@ public class Day12 {
       
       Map<Integer, Integer> routeMap = new HashMap<>();
       routeMap.put(start, -1);
-      List<Integer> options = options(start);
-      Map<Integer, Integer> optionsMap = options.stream()
-            .collect(Collectors.toMap(Function.identity(), option -> start));
       
-      pathFinder(optionsMap, routeMap);
+      pathFinder(Set.of(start), routeMap);
       
       List<Integer> traceRoute = trace(routeMap);
       printGrid();
@@ -109,22 +104,22 @@ public class Day12 {
       return traceRoute.size();
    }
    
-   void pathFinder(Map<Integer, Integer> optionsMap, Map<Integer, Integer> route) {
-      Map<Integer, Integer> nextMap = new HashMap<>();
+   void pathFinder(Set<Integer> optionsSet, Map<Integer, Integer> route) {
+      Set<Integer> nextSet = new HashSet<>();
       
-      for (Map.Entry<Integer, Integer> entry : optionsMap.entrySet()) {
-         Integer option = entry.getKey();
-         Integer existing = route.putIfAbsent(option, entry.getValue());
-         
-         if (existing != null) continue;
-         if (end == option.intValue()) return;
-         
-         List<Integer> options = options(option);
-         options.forEach(next -> nextMap.putIfAbsent(next, option));
+      for (Integer location : optionsSet) {
+         for (Integer next : options(location)) {
+            Integer existing = route.putIfAbsent(next, location);
+            
+            if (existing != null) continue;
+            if (end == next.intValue()) return;
+            
+            nextSet.add(next);
+         }
       }
       
-      if (nextMap.isEmpty()) return;
-      pathFinder(nextMap, route);
+      if (nextSet.isEmpty()) return;
+      pathFinder(nextSet, route);
    }
    
    List<Integer> trace(Map<Integer, Integer> routeMap) {
@@ -168,11 +163,8 @@ public class Day12 {
          
          Map<Integer, Integer> routeMap = new HashMap<>();
          routeMap.put(a, -1);
-         List<Integer> options = options(a);
-         Map<Integer, Integer> optionsMap = options.stream()
-               .collect(Collectors.toMap(Function.identity(), option -> a));
          
-         pathFinder(optionsMap, routeMap);
+         pathFinder(Set.of(a), routeMap);
          
          List<Integer> traceRoute = trace(routeMap);
          if (traceRoute.isEmpty()) continue;
