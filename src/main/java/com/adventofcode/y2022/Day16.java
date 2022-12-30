@@ -111,9 +111,6 @@ public class Day16 {
       unexplored.removeAll(route);
 
       int score = score(openValves, valveRouteMap, legend);
-      int minutes = valveRouteMap.values().stream()
-            .mapToInt(List::size)
-            .sum();
       String best = null;
       List<String> bestRoute = null;
       Map<String, List<String>> bestRouteMap = null;
@@ -121,8 +118,6 @@ public class Day16 {
       for (String explore : unexplored) {
          for (int index = 1, count = openValves.size(); index <= count; index++) {
             List<String> traceRoute = route(openValves.get(index - 1), explore, legend);
-            if (minutes + traceRoute.size() > MINUTES) continue;
-            
             List<String> detour = new ArrayList<>(openValves);
             Map<String, List<String>> detourRouteMap = new HashMap<>(valveRouteMap);
 
@@ -132,9 +127,7 @@ public class Day16 {
             //re-route
             if (index < count) { 
                List<String> reRoute = route(explore, openValves.get(index), legend);
-               List<String> oldRoute = detourRouteMap.put(openValves.get(index), reRoute);
-               
-               if (minutes - oldRoute.size() + reRoute.size() + traceRoute.size() > MINUTES) continue;
+               detourRouteMap.put(openValves.get(index), reRoute);
             }
             
             int detourScore = score(detour, detourRouteMap, legend);
@@ -147,8 +140,8 @@ public class Day16 {
          }
       }
       
+      printRouteScore(route, valveRouteMap, legend);
       if (best == null) return score;
-
       return route(bestRoute, bestRouteMap, legend);
    }
    
@@ -202,6 +195,8 @@ public class Day16 {
       for (String opened : openValves) {
          List<String> route = valveRouteMap.get(opened);
          minutes += route.size();
+         if (minutes >= 30) break;
+         
          Valve valve = legend.get(opened);
          score += (MINUTES - minutes) * valve.flowrate;
       }
