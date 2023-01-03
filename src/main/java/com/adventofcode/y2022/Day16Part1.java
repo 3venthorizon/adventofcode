@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Day16 {
+public class Day16Part1 {
    static final String MARKER_VALVE = "Valve ";
    static final String MARKER_HAS = " has";
    static final String MARKER_ROUTE = " -> ";
@@ -215,125 +215,5 @@ public class Day16 {
       }
       
       System.out.println("Total Pressure: " + score);
-   }
-   
-   public int part2() throws IOException, URISyntaxException {
-      Map<String, Valve> legendMap = loadMap();
-      List<String> workingList = legendMap.values().stream()
-            .filter(valve -> valve.flowrate > 0)
-            .sorted((left, right) -> Integer.compare(right.flowrate, left.flowrate))
-            .map(valve -> valve.name)
-            .toList();
-      Map<String, List<String>> routeMap = new HashMap<>();
-      
-      for (int index = 0, count = workingList.size(); index < count; index++) {
-         String start = workingList.get(index);
-         String routeId = "AA" + MARKER_ROUTE + start;
-         List<String> route = route("AA", start, legendMap);
-         routeMap.put(routeId, route);
-         
-         for (int outdex = 0; outdex < count; outdex++) {
-            if (index == outdex) continue;
-            
-            String destination = workingList.get(outdex);
-            routeId = start + MARKER_ROUTE + destination;
-            route = route(start, destination, legendMap);
-            routeMap.put(routeId, route);
-         }
-      }
-      
-      List<String> myRoute = List.of("AA");
-      List<String> elephantRoute = List.of("AA");
-      
-      return elephantRoute(myRoute, elephantRoute, workingList, routeMap, legendMap);
-   }
-   
-   int elephantRoute(List<String> myRoute, List<String> elephantRoute, List<String> workingList,
-         Map<String, List<String>> routeMap, Map<String, Valve> legendMap) {
-      List<String> unexplored = new ArrayList<>(workingList);
-      
-      int myPressure = pressure(myRoute, routeMap, legendMap);
-      int elephantPressure = pressure(elephantRoute, routeMap, legendMap);
-      int totalPressure = myPressure + elephantPressure;
-      
-      myRoute = explore(unexplored, myRoute, routeMap, legendMap);
-      unexplored.removeAll(myRoute);
-      elephantRoute = explore(unexplored, elephantRoute, routeMap, legendMap);
-      unexplored.removeAll(elephantRoute);
-      
-      int pressure = pressure(myRoute, routeMap, legendMap);
-      if (pressure > myPressure) printPressure("Me      ", myRoute, routeMap, legendMap);
-      myPressure = pressure;
-      
-      pressure = pressure(elephantRoute, routeMap, legendMap);
-      if (pressure > elephantPressure) printPressure("Elephant", elephantRoute, routeMap, legendMap);
-      elephantPressure = pressure;
-      
-      if (totalPressure == myPressure + elephantPressure) return totalPressure;
-      return elephantRoute(myRoute, elephantRoute, unexplored, routeMap, legendMap);
-   }
-   
-   List<String> explore(List<String> unexplored, List<String> openValves, 
-         Map<String, List<String>> routeMap, Map<String, Valve> legendMap) {
-      List<String> bestRoute = openValves;
-      int pressure = pressure(openValves, routeMap, legendMap);
-      
-      for (String explore : unexplored) {
-         for (int index = 1, count = openValves.size(); index <= count; index++) {
-            List<String> detour = new ArrayList<>(openValves);
-            detour.add(index, explore);
-            int detourPressure = pressure(detour, routeMap, legendMap);
-            
-            if (detourPressure <= pressure) continue;
-            
-            pressure = detourPressure;
-            bestRoute = detour;
-         }
-      }
-      
-      return bestRoute;
-   }
-   
-   int pressure(List<String> openValves, Map<String, List<String>> routeMap, Map<String, Valve> legendMap) {
-      int minutes = 0;
-      int pressure = 0;
-      String start = openValves.get(0);
-      
-      for (int index = 1, count = openValves.size(); index < count; index++) {
-         String opened = openValves.get(index);
-         String routeId = start + MARKER_ROUTE + opened;
-         start = opened;
-         List<String> route = routeMap.get(routeId);
-         minutes += route.size();
-         if (minutes >= 26) break;
-         
-         Valve valve = legendMap.get(opened);
-         pressure += (26 - minutes) * valve.flowrate;
-      }
-      
-      return pressure;
-   }
-   
-   void printPressure(String whom, List<String> openValves, 
-         Map<String, List<String>> routeMap, Map<String, Valve> legendMap) {
-      int minutes = 0;
-      int pressure = 0;
-      String start = openValves.get(0);
-      
-      for (int index = 1, count = openValves.size(); index < count; index++) {
-         String opened = openValves.get(index);
-         String routeId = start + MARKER_ROUTE + opened;
-         start = opened;
-         List<String> route = routeMap.get(routeId);
-         minutes += route.size();
-         if (minutes >= 26) break;
-         
-         Valve valve = legendMap.get(opened);
-         pressure += (26 - minutes) * valve.flowrate;
-         
-         System.out.println(opened + " " + whom + " Pressure: " + pressure + "\t" + route);
-      }
-      
-      System.out.println(whom + " Total Pressure: " + pressure);
    }
 }
