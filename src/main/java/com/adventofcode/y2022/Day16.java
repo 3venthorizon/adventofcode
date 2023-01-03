@@ -23,8 +23,6 @@ public class Day16 {
    static final String MARKER_TUNNELS = "valve";
    static final String DELIMITER = ", ";
    
-   static final int MINUTES = 30;
-   
    static class Valve {
       final String name;
       final int flowrate;
@@ -196,7 +194,7 @@ public class Day16 {
          if (minutes >= 30) break;
          
          Valve valve = legend.get(opened);
-         score += (MINUTES - minutes) * valve.flowrate;
+         score += (30 - minutes) * valve.flowrate;
       }
       
       return score;
@@ -210,7 +208,7 @@ public class Day16 {
          List<String> route = valveRouteMap.get(opened);
          minutes += route.size();
          Valve valve = legend.get(opened);
-         int pressure = (MINUTES - minutes) * valve.flowrate;
+         int pressure = (30 - minutes) * valve.flowrate;
          score += pressure;
 
          System.out.println(opened + " Pressure: " + pressure + "\t" + route);
@@ -253,26 +251,26 @@ public class Day16 {
    int elephantRoute(List<String> myRoute, List<String> elephantRoute, List<String> workingList,
          Map<String, List<String>> routeMap, Map<String, Valve> legendMap) {
       List<String> unexplored = new ArrayList<>(workingList);
-      unexplored.removeAll(myRoute);
-      unexplored.removeAll(elephantRoute);
       
       int myPressure = pressure(myRoute, routeMap, legendMap);
       int elephantPressure = pressure(elephantRoute, routeMap, legendMap);
       int totalPressure = myPressure + elephantPressure;
       
       myRoute = explore(unexplored, myRoute, routeMap, legendMap);
+      unexplored.removeAll(myRoute);
       elephantRoute = explore(unexplored, elephantRoute, routeMap, legendMap);
+      unexplored.removeAll(elephantRoute);
       
       int pressure = pressure(myRoute, routeMap, legendMap);
       if (pressure > myPressure) printPressure("Me      ", myRoute, routeMap, legendMap);
       myPressure = pressure;
       
       pressure = pressure(elephantRoute, routeMap, legendMap);
-      if (pressure > elephantPressure) printPressure("Elephant", myRoute, routeMap, legendMap);
+      if (pressure > elephantPressure) printPressure("Elephant", elephantRoute, routeMap, legendMap);
       elephantPressure = pressure;
       
       if (totalPressure == myPressure + elephantPressure) return totalPressure;
-      return elephantRoute(myRoute, elephantRoute, workingList, routeMap, legendMap);
+      return elephantRoute(myRoute, elephantRoute, unexplored, routeMap, legendMap);
    }
    
    List<String> explore(List<String> unexplored, List<String> openValves, 
