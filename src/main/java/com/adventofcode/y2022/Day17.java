@@ -55,7 +55,7 @@ public class Day17 {
       
       while (direction > -1) {
          if (direction != LEFT && direction != RIGHT) continue;
-         rock = shiftNdrop(direction, depth, rockIndex, rock, column);
+         shiftNdrop(direction, depth, rockIndex, rock, column);
          
          direction = reader.read();
       }
@@ -63,13 +63,13 @@ public class Day17 {
       return 0;
    }
    
-   List<Integer> shiftNdrop(int direction, int depth, int rockIndex, List<Integer> rock, List<Integer> column) {
-      rock = shift(direction, depth, rock, column);
+   void shiftNdrop(int direction, int depth, int rockIndex, List<Integer> rock, List<Integer> column) {
+      shift(direction, depth, rock, column);
+      drop(depth, rock, column);
       
-      return rock;
    }
    
-   List<Integer> shift(int direction, int depth, List<Integer> rock, List<Integer> column) {
+   void shift(int direction, int depth, List<Integer> rock, List<Integer> column) {
       UnaryOperator<Integer> shifter = direction == LEFT ? SHIFT_LEFT : SHIFT_RIGHT;
       List<Integer> shiftRock = new ArrayList<>();
       List<Integer> shiftColumn = new ArrayList<>();
@@ -77,25 +77,27 @@ public class Day17 {
       
       for (Integer element : rock) {
          int shifted = shifter.apply(element);
-         if (Integer.bitCount(shifted) != Integer.bitCount(element)) return rock;
+         if (Integer.bitCount(shifted) != Integer.bitCount(element)) return;
          
          shiftRock.add(shifted);
          int chamber = column.get(depthIndex++) ^ element; //clear chamber
          shifted = chamber ^ shifted;
          
-         if ((shifted & chamber) != chamber) return rock;
+         if ((shifted & chamber) != chamber) return;
          shiftColumn.add(shifted);
       }
       
+      rock.clear();
+      rock.addAll(shiftRock);
       depthIndex = depth;
       
       for (Integer chamber : shiftColumn) {
          column.set(depthIndex++, chamber);
       }
-      
-      return shiftRock;
    }
    
-   
+   void drop(int depth, List<Integer> rock, List<Integer> column) {
+      
+   }
    
 }
