@@ -65,8 +65,7 @@ public class Day17 {
    
    void shiftNdrop(int direction, int depth, int rockIndex, List<Integer> rock, List<Integer> column) {
       shift(direction, depth, rock, column);
-      drop(depth, rock, column);
-      
+      drop(depth, rockIndex, rock, column);
    }
    
    void shift(int direction, int depth, List<Integer> rock, List<Integer> column) {
@@ -96,7 +95,7 @@ public class Day17 {
       }
    }
    
-   void drop(int depth, List<Integer> rock, List<Integer> column) {
+   void drop(int depth, int rockIndex, List<Integer> rock, List<Integer> column) {
       
    }
    
