@@ -56,11 +56,10 @@ public class Day17 {
       while (rockIndex < 2022) {
          int direction = input[index];
          shiftNdrop(direction);
-         if (index == 10) print();
          index = (index + 1) % input.length;
       }
       
-      return column.size() - rock.size() - SPACE3.size() - 1/*floor*/;
+      return height + column.size() - rock.size() - SPACE3.size();
    }
    
    public int part2() throws IOException, URISyntaxException {
@@ -133,25 +132,23 @@ public class Day17 {
       }
       
       int depthIndex = depth;
-      int blockedIndex = 0;
       
       for (Integer chamber : dropColumn) {
          column.set(depthIndex++, chamber);
-         
-         if (chamber == MASK_WIDTH) blockedIndex = depthIndex;
       }
       
       if (column.get(0) == 0) column.remove(0); //remove leading empty space from column
       else depth++;
-      
-//      if (blockedIndex > 0) {
-//         List<Integer> oldColumn = column;
-//         column = new ArrayList<>(oldColumn.subList(0, blockedIndex));
-//         oldColumn.clear();
-//      }
    }
    
    void nextRock() {
+      int blockedIndex = column.indexOf(MASK_WIDTH);
+      
+      if (blockedIndex > 0) {
+         height += column.size() - (blockedIndex + 1);
+         column = new ArrayList<>(column.subList(0, blockedIndex + 1));
+      }
+      
       depth = 0;
       rockIndex++;
       column.addAll(0, SPACE3);
