@@ -11,7 +11,7 @@ class Day17Test {
 
    @Test
    void testPart1() throws IOException, URISyntaxException {
-      test.part1();
+      System.out.println(test.part1()); 
    }
 
 }

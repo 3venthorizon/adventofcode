@@ -1,6 +1,5 @@
 package com.adventofcode.y2022;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -38,37 +37,57 @@ public class Day17 {
    static final List<List<Integer>> ROCKS = List.of(ROCK1, ROCK2, ROCK3, ROCK4, ROCK5);
    static final List<Integer> SPACE3 = List.of(0, 0, 0);
    
+   int depth = 0;
+   long rockIndex = -1L;
+   int height = -1;
+   List<Integer> rock = new ArrayList<>(ROCKS.get(0));
+   List<Integer> column = new ArrayList<>();
+   
    public int part1() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
       URL resource = classLoader.getResource("2022/day17.input");
-      BufferedReader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
-      List<Integer> column = new ArrayList<>();
-      int depth = 0;
-      int rockIndex = 0;
-      List<Integer> rock = new ArrayList<>(ROCKS.get(rockIndex));
-      
-      column.addAll(rock);
-      column.addAll(SPACE3);
-      column.add(-1); //floor
-      
-      int direction = reader.read();
-      
-      while (direction > -1) {
-         if (direction != LEFT && direction != RIGHT) continue;
-         shiftNdrop(direction, depth, rockIndex, rock, column);
+      byte[] input = Files.readAllBytes(Paths.get(resource.toURI()));
+      int index = 0;
          
-         direction = reader.read();
+      nextRock();
+      column.add(-1); //floor
+      print();
+      
+      while (rockIndex < 2022) {
+         int direction = input[index];
+         shiftNdrop(direction);
+         if (index == 10) print();
+         index = (index + 1) % input.length;
       }
       
-      return 0;
+      return column.size() - rock.size() - SPACE3.size() - 1/*floor*/;
    }
    
-   void shiftNdrop(int direction, int depth, int rockIndex, List<Integer> rock, List<Integer> column) {
-      shift(direction, depth, rock, column);
-      drop(depth, rockIndex, rock, column);
+   public int part2() throws IOException, URISyntaxException {
+      ClassLoader classLoader = getClass().getClassLoader();
+      URL resource = classLoader.getResource("2022/day17.input");
+      byte[] input = Files.readAllBytes(Paths.get(resource.toURI()));
+      int index = 0;
+         
+      nextRock();
+      column.add(-1); //floor
+      print();
+      
+      while (rockIndex < 1_000_000_000_000L) {
+         int direction = input[index];
+         shiftNdrop(direction);
+         index = (index + 1) % input.length;
+      }
+      
+      return height;
    }
    
-   void shift(int direction, int depth, List<Integer> rock, List<Integer> column) {
+   void shiftNdrop(int direction) {
+      shift(direction);
+      drop();
+   }
+   
+   void shift(int direction) {
       UnaryOperator<Integer> shifter = direction == LEFT ? SHIFT_LEFT : SHIFT_RIGHT;
       List<Integer> shiftRock = new ArrayList<>();
       List<Integer> shiftColumn = new ArrayList<>();
@@ -95,8 +114,55 @@ public class Day17 {
       }
    }
    
-   void drop(int depth, int rockIndex, List<Integer> rock, List<Integer> column) {
+   void drop() {
+      List<Integer> dropColumn = new ArrayList<>(column.subList(depth, depth + rock.size() + 1));
       
+      for (int count = rock.size(), index = count - 1; index >= 0; index--) {
+         int element = rock.get(index);
+         int chamber = dropColumn.get(index) ^ element; //clear chamber
+         int drop = dropColumn.get(index + 1);
+         int dropped = drop ^ element;
+         
+         dropColumn.set(index, chamber);
+         dropColumn.set(index + 1, dropped);
+         
+         if ((dropped & drop) == drop) continue;
+         
+         nextRock();
+         return;
+      }
+      
+      int depthIndex = depth;
+      
+      for (Integer chamber : dropColumn) {
+         column.set(depthIndex++, chamber);
+         
+         if (chamber == MASK_WIDTH) {
+            height = column.size() - depthIndex;
+            System.out.println("XXXXXXX height = " + height);
+         }
+      }
+      
+      if (column.get(0) == 0) column.remove(0); //remove leading empty space from column
+      else depth++;
    }
    
+   void nextRock() {
+      depth = 0;
+      rockIndex++;
+      column.addAll(0, SPACE3);
+      rock = new ArrayList<>(ROCKS.get((int) (rockIndex % ROCKS.size())));
+      column.addAll(0, rock);
+   }
+   
+   void print() {
+      column.stream()
+            .map(Integer::toBinaryString)
+            .map(binaryStr -> String.format("%7s", binaryStr)
+                  .replace(' ', '.')
+                  .replace('0', '.')
+                  .replace('1', '#'))
+            .forEach(System.out::println);
+      System.out.println();
+   }
 }
