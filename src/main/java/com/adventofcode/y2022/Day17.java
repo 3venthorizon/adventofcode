@@ -147,8 +147,10 @@ public class Day17 {
    void nextRock() {
       int blockedIndex = column.indexOf(MASK_WIDTH);
       
-      if (blockedIndex > 0) {
-         height += column.size() - (blockedIndex + 1);
+      if (blockedIndex > 0 && blockedIndex != (column.size() - 1)) {
+         int delta = column.size() - (blockedIndex + 1);
+//         System.out.println("Delta: " + delta);
+         height += delta;
          column = new ArrayList<>(column.subList(0, blockedIndex + 1));
       }
       
