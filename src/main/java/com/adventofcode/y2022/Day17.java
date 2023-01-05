@@ -39,11 +39,11 @@ public class Day17 {
    
    int depth = 0;
    long rockIndex = -1L;
-   int height = -1;
+   long height = -1;
    List<Integer> rock = new ArrayList<>(ROCKS.get(0));
    List<Integer> column = new ArrayList<>();
    
-   public int part1() throws IOException, URISyntaxException {
+   public long part1() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
       URL resource = classLoader.getResource("2022/day17.input");
       byte[] input = Files.readAllBytes(Paths.get(resource.toURI()));
@@ -51,7 +51,6 @@ public class Day17 {
          
       nextRock();
       column.add(-1); //floor
-      print();
       
       while (rockIndex < 2022) {
          int direction = input[index];
@@ -62,7 +61,7 @@ public class Day17 {
       return height + column.size() - rock.size() - SPACE3.size();
    }
    
-   public int part2() throws IOException, URISyntaxException {
+   public long part2() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
       URL resource = classLoader.getResource("2022/day17.input");
       byte[] input = Files.readAllBytes(Paths.get(resource.toURI()));
@@ -70,13 +69,17 @@ public class Day17 {
          
       nextRock();
       column.add(-1); //floor
-      print();
+      long limit = 1_000_000_000_000L;
       
-      while (rockIndex < 1_000_000_000_000L) {
+      while (rockIndex < limit) {
          int direction = input[index];
          shiftNdrop(direction);
          index = (index + 1) % input.length;
+         
+         if (Math.floorMod(rockIndex, ROCKS.size()) == 0 && index == 0) break;
       }
+      
+      System.out.println("Rocks # " + rockIndex + 1);
       
       return height;
    }
