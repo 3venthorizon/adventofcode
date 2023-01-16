@@ -2,7 +2,6 @@ package com.adventofcode.y2022;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -14,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import com.opencsv.stream.reader.LineReader;
 
 public class Day7 {
    
@@ -62,8 +59,7 @@ public class Day7 {
    BufferedReader createReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
       URL resource = classLoader.getResource("2022/day7.input");
-      Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
-      return new BufferedReader(reader);
+      return Files.newBufferedReader(Paths.get(resource.toURI()));
    }
    
    public long part1() throws IOException, URISyntaxException {
@@ -98,13 +94,12 @@ public class Day7 {
       Set<Directory> directories = new HashSet<>();
       
       try (BufferedReader reader = createReader()) {
-         LineReader lineReader = new LineReader(reader, false);
-         String line = lineReader.readLine();
+         String line = reader.readLine();
          
          while (line != null) {
             current = build(current, line);
             directories.add(current);
-            line = lineReader.readLine();
+            line = reader.readLine();
          }
       }
       
@@ -142,6 +137,8 @@ public class Day7 {
       long size = directory.subdirs.stream()
             .mapToLong(this::calculateSize)
             .reduce(0L, Math::addExact);
-      return directory.fileSizeMap.values().stream().mapToLong(Long::longValue).reduce(size, Math::addExact);
+      return directory.fileSizeMap.values().stream()
+            .mapToLong(Long::longValue)
+            .reduce(size, Math::addExact);
    }
 }

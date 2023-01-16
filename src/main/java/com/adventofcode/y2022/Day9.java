@@ -2,7 +2,6 @@ package com.adventofcode.y2022;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -121,8 +120,7 @@ public class Day9 {
    BufferedReader createReader() throws IOException, URISyntaxException {
       ClassLoader classLoader = getClass().getClassLoader();
       URL resource = classLoader.getResource("2022/day9.input");
-      Reader reader = Files.newBufferedReader(Paths.get(resource.toURI()));
-      return new BufferedReader(reader);
+      return Files.newBufferedReader(Paths.get(resource.toURI()));
    }
 
    public int part1() throws IOException, URISyntaxException {
