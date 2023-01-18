@@ -102,12 +102,11 @@ public class Day15 {
    void loadCoordinates(Map<Coordinate, Coordinate> sensorBeaconMap, Map<Coordinate, Integer> sensorDistanceMap) 
          throws IOException, URISyntaxException {
       try (BufferedReader reader = createReader()) {
-         LineReader lineReader = new LineReader(reader, false);
-         String line = lineReader.readLine();
+         String line = reader.readLine();
          
          while (line != null) {
             readSensorBeacon(line, sensorBeaconMap, sensorDistanceMap);
-            line = lineReader.readLine();
+            line = reader.readLine();
          }
       }
    }
