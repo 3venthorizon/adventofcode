@@ -16,8 +16,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import com.opencsv.stream.reader.LineReader;
-
 public class Day15 {
    static final String SX = "Sensor at x=";
    static final String Y = "y=";

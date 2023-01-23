@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -101,28 +102,41 @@ public class Day18 {
       List<Coordinate> coordinates = readCoordinates();
       Map<Integer, List<Coordinate>> xmap = coordinates.stream().collect(Collectors.groupingBy(c -> c.x));
       Map<Integer, List<Coordinate>> ymap = coordinates.stream().collect(Collectors.groupingBy(c -> c.y));
-      long total = coordinates.size() * 6L;
+      long total = 0L;
       
       for (Coordinate coordinate : coordinates) {
-         long xcount = ymap.get(coordinate.y).stream()
+         IntSummaryStatistics xstats = ymap.get(coordinate.y).stream()
                .filter(adjacent -> adjacent.z == coordinate.z)
                .filter(adjacent -> adjacent.x != coordinate.x)
-               .limit(2)
-               .count();
-         long ycount = xmap.get(coordinate.x).stream()
+               .mapToInt(adjacent -> adjacent.x)
+               .summaryStatistics();
+         if (coordinate.x > xstats.getMax()) total++;
+         if (coordinate.x < xstats.getMin()) total++;
+         
+         
+         IntSummaryStatistics ystats = xmap.get(coordinate.x).stream()
                .filter(adjacent -> adjacent.z == coordinate.z)
                .filter(adjacent -> adjacent.y != coordinate.y)
-               .limit(2)
-               .count();
-         long zcount = xmap.get(coordinate.x).stream()
+               .mapToInt(adjacent -> adjacent.y)
+               .summaryStatistics();
+         if (coordinate.y > ystats.getMax()) total++;
+         if (coordinate.y < ystats.getMin()) total++;
+         
+         IntSummaryStatistics zstats = xmap.get(coordinate.x).stream()
                .filter(adjacent -> adjacent.y == coordinate.y)
                .filter(adjacent -> adjacent.z != coordinate.z)
-               .limit(2)
-               .count();
-         
-         total = total - xcount - ycount - zcount;
+               .mapToInt(adjacent -> adjacent.z)
+               .summaryStatistics();
+         if (coordinate.z > zstats.getMax()) total++;
+         if (coordinate.z < zstats.getMin()) total++;
       }
       
       return total;
+   }
+   
+   int count(Coordinate coordinate, Map<Integer, List<Coordinate>> xmap, Map<Integer, List<Coordinate>> ymap) {
+      int count = 0;
+      
+      return count;
    }
 }
