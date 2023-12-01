@@ -167,16 +167,16 @@ public class Day16Part2 {
       
       myRoute = explore(unexplored, myRoute, routeMap, legendMap);
       unexplored.removeAll(myRoute);
-//      elephantRoute = explore(unexplored, elephantRoute, routeMap, legendMap);
-//      unexplored.removeAll(elephantRoute);
+      //      elephantRoute = explore(unexplored, elephantRoute, routeMap, legendMap);
+      //      unexplored.removeAll(elephantRoute);
       
       int pressure = pressure(myRoute, routeMap, legendMap);
       if (pressure > myPressure) printPressure("Me      ", myRoute, routeMap, legendMap);
       myPressure = pressure;
       
-//      pressure = pressure(elephantRoute, routeMap, legendMap);
-//      if (pressure > elephantPressure) printPressure("Elephant", elephantRoute, routeMap, legendMap);
-//      elephantPressure = pressure;
+      //      pressure = pressure(elephantRoute, routeMap, legendMap);
+      //      if (pressure > elephantPressure) printPressure("Elephant", elephantRoute, routeMap, legendMap);
+      //      elephantPressure = pressure;
       
       if (totalPressure == myPressure + elephantPressure) return totalPressure;
       return elephantRoute(myRoute, elephantRoute, unexplored, routeMap, legendMap);
