@@ -7,25 +7,49 @@ import java.util.regex.Pattern;
  * {@link https://adventofcode.com/2023/day/1}
  */
 public class Day1 {
-   static final Pattern PATTERN_NUMBER = Pattern.compile("\\d");
+   static final Pattern PATTERN_DIGIT = Pattern.compile("\\d");
+   static final Pattern PATTERN_NUMBER = Pattern.compile("(\\d|one|two|three|four|five|six|seven|eight|nine)");
 
-   public long solvePart1(String fileName) {
+   public long part1(String fileName) {
       return FileLineStreamer.read(fileName)
-            .map(this::extractDigits)
+            .map(line -> extractDigits(PATTERN_DIGIT.matcher(line)))
             .mapToLong(Long::parseLong)
             .reduce(Long::sum)
             .orElse(0L);
    }
 
-   String extractDigits(String line) {
-      Matcher matcher = PATTERN_NUMBER.matcher(line);
-      if (!matcher.find()) return "0";
-      int firstIndex = matcher.start();
-      
-      matcher = PATTERN_NUMBER.matcher(new StringBuilder(line).reverse().toString());
-      matcher.find();
-      int lastIndex = line.length() - matcher.start() - 1;
+   public long part2(String fileName) {
+      return FileLineStreamer.read(fileName)
+            .map(line -> extractDigits(PATTERN_NUMBER.matcher(line)))
+            .map(this::replaceDigits)
+            .mapToLong(Long::parseLong)
+            .reduce(Long::sum)
+            .orElse(0L);
+   }
 
-      return line.charAt(firstIndex) + "" + line.charAt(lastIndex);
+   String replaceDigits(String line) {
+      return line.replace("one", "1")
+            .replace("two", "2")
+            .replace("three", "3")
+            .replace("four", "4")
+            .replace("five", "5")
+            .replace("six", "6")
+            .replace("seven", "7")
+            .replace("eight", "8")
+            .replace("nine", "9");
+   }
+
+   String extractDigits(Matcher matcher) {
+      if (!matcher.find()) return "0";
+      int index = matcher.start();
+      String firstDigit = matcher.group();
+      String lastDigit = firstDigit;
+
+      while (matcher.find(index + 1)) {
+         index = matcher.start();
+         lastDigit = matcher.group();
+      }
+
+      return firstDigit + lastDigit;
    }
 }
