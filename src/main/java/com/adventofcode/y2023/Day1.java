@@ -12,7 +12,8 @@ public class Day1 {
 
    public long part1(String fileName) {
       return FileLineStreamer.read(fileName)
-            .map(line -> extractDigits(PATTERN_DIGIT.matcher(line)))
+            .map(PATTERN_DIGIT::matcher)
+            .map(this::extractDigits)
             .mapToLong(Long::parseLong)
             .reduce(Long::sum)
             .orElse(0L);
@@ -20,7 +21,8 @@ public class Day1 {
 
    public long part2(String fileName) {
       return FileLineStreamer.read(fileName)
-            .map(line -> extractDigits(PATTERN_NUMBER.matcher(line)))
+            .map(PATTERN_NUMBER::matcher)
+            .map(this::extractDigits)
             .map(this::replaceDigits)
             .mapToLong(Long::parseLong)
             .reduce(Long::sum)

@@ -25,9 +25,8 @@ public class Day2 {
       return FileLineStreamer.read(fileName)
             .map(this::gameMapper)
             .filter(game -> game.subsets.stream().allMatch(predicate))
-            .map(Game::number)
-            .reduce(Integer::sum)
-            .orElse(0);
+            .mapToInt(Game::number)
+            .sum();
    }
 
    public int part2(String fileName) {
@@ -35,8 +34,7 @@ public class Day2 {
             .map(this::gameMapper)
             .map(this::maximum)
             .mapToInt(subset -> subset.red * subset.green * subset.blue)
-            .reduce(Integer::sum)
-            .orElse(0);
+            .sum();
    }
 
    Game gameMapper(String line) {
