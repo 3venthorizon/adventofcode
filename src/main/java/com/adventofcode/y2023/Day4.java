@@ -38,7 +38,7 @@ public class Day4 {
 
    Map<Long, Long> combine(Map<Long, Long> left, Map<Long, Long> right) {
       Map<Long, Long> combine = new HashMap<>(left);
-      left.putAll(right);
+      combine.putAll(right);
 
       return combine;
    }

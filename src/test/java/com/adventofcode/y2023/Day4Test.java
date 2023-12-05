@@ -34,5 +34,6 @@ class Day4Test {
       long result = day4.part2("2023/day4/data.input");
 
       System.out.println("Day4 - Part2: " + result);
+      assertEquals(14624680L, result);
    }
 }
