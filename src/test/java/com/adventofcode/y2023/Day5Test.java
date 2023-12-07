@@ -32,6 +32,9 @@ class Day5Test {
 
    @Test
    void testPart2() {
+      long result = day5part2.part2("2023/day5/data.input");
 
+      System.out.println("Day5 - Part2: " + result);
+      assertEquals(15880236L, result);
    }
 }

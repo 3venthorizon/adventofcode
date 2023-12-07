@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Day5Part2 {
-   record Range(long source, long destination, long length) {}
+   record Range(long startIndex, long endIndex) {}
 
    static class RangeAccumulator {
-      List<Range> sourceRanges = new ArrayList<>();
-      List<Range> destinationRanges = new ArrayList<>();
+      final List<Range> ranges = new ArrayList<>();
+      final List<Range> destinations = new ArrayList<>();
    }
 
    static final Pattern PATTERN_NUMBERS = Pattern.compile("\\d+\\s\\d+\\s\\d+");
@@ -26,8 +27,10 @@ public class Day5Part2 {
    long part2(String fileName) {
       RangeAccumulator accumulator = FileLineStreamer.read(fileName)
             .collect(RangeAccumulator::new, this::accumulate, this::combine);
+      accumulator = combine(accumulator, new RangeAccumulator());
+      Collections.sort(accumulator.ranges, Comparator.comparing(Range::startIndex));
       
-      return 0L;
+      return accumulator.ranges.get(0).startIndex;
    }
 
    void accumulate(RangeAccumulator accumulator, String line) {
@@ -42,8 +45,38 @@ public class Day5Part2 {
       List<Long> values = List.of(line.split(" ")).stream()
             .map(Long::parseLong)
             .toList();
-      Range range = new Range(values.get(INDEX_SOURCE), values.get(INDEX_DESTINATION), values.get(INDEX_LENGTH));
-      accumulator.destinationRanges.add(range);
+      final long length = values.get(INDEX_LENGTH);
+      final long startIndex = values.get(INDEX_SOURCE);
+      final long endIndex = startIndex + length;
+      final long destinationIndex = values.get(INDEX_DESTINATION);
+
+      ListIterator<Range> sourceIterator = accumulator.ranges.listIterator();
+
+      while (sourceIterator.hasNext()) {
+         Range source = sourceIterator.next();
+
+         if (source.endIndex <= startIndex) continue;
+         if (source.startIndex >= endIndex) continue;
+
+         sourceIterator.remove();
+         long outerStart = Math.min(startIndex, source.startIndex);
+         long joinStart = Math.max(startIndex, source.startIndex);
+         long joinEnd = Math.min(endIndex, source.endIndex);
+         long outerEnd = Math.max(endIndex, source.endIndex);
+         long offset = joinStart - startIndex;
+         long joinLength = (joinEnd - joinStart);
+         long destinationStart = destinationIndex + offset;
+         long destinationEnd = destinationStart + joinLength;
+
+         accumulator.destinations.add(new Range(destinationStart, destinationEnd));
+         
+         if (outerStart == source.startIndex && outerStart != joinStart) {
+            sourceIterator.add(new Range(outerStart, joinStart));
+         }
+         if (outerEnd == source.endIndex && outerEnd != joinEnd) {
+            sourceIterator.add(new Range(joinEnd, outerEnd));
+         }
+      }
    }
 
    boolean seedsRanges(RangeAccumulator accumulator, String line) {
@@ -55,8 +88,9 @@ public class Day5Part2 {
          List<Long> values = List.of(matcher.group().split(" ")).stream()
                .map(Long::parseLong)
                .toList();
-         Range range = new Range(values.get(0), values.get(0), values.get(1));
-         accumulator.destinationRanges.add(range);
+         long startIndex = values.get(0);
+         long endIndex = startIndex + values.get(1);
+         accumulator.ranges.add(new Range(startIndex, endIndex));
       }
 
       return true;
@@ -65,14 +99,18 @@ public class Day5Part2 {
    boolean switchRange(RangeAccumulator accumulator, String line) {
       if (!PATTERN_LATCH.matcher(line).find()) return false;
 
-      accumulator.sourceRanges = accumulator.destinationRanges;
-      accumulator.destinationRanges = new ArrayList<>();
+      accumulator.ranges.addAll(accumulator.destinations);
+      accumulator.destinations.clear();
 
       return true;
    }
 
    RangeAccumulator combine(RangeAccumulator left, RangeAccumulator right) {
       RangeAccumulator combined = new RangeAccumulator();
+      combined.ranges.addAll(left.ranges);
+      combined.ranges.addAll(left.destinations);
+      combined.ranges.addAll(right.ranges);
+      combined.ranges.addAll(right.destinations);
 
       return combined;
    }
