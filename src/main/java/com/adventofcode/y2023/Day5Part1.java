@@ -4,13 +4,23 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day5 {
+public class Day5Part1 {
    static class TransformAccumulator {
       final Set<Long> values = new HashSet<>();
       final Set<Long> latched = new HashSet<>();
+      final Function<String, List<Long>> extractSeeds;
+
+      TransformAccumulator() {
+         this(null);
+      }
+
+      TransformAccumulator(Function<String, List<Long>> extractSeeds) {
+         this.extractSeeds = extractSeeds;
+      }
    }
 
    static final Pattern PATTERN_NUMBERS = Pattern.compile("\\d+\\s\\d+\\s\\d+");
@@ -22,7 +32,7 @@ public class Day5 {
 
    public long part1(String fileName) {
       TransformAccumulator accumulator = FileLineStreamer.read(fileName)
-            .collect(TransformAccumulator::new, this::accumulate, this::combine);
+            .collect(() -> new TransformAccumulator(this::extractPart1Seeds), this::accumulate, this::combine);
       accumulator = combine(accumulator, accumulator);
       return accumulator.values.stream()
             .mapToLong(Long::longValue)
@@ -30,16 +40,17 @@ public class Day5 {
             .getMin();
    }
 
-   public long part2(String fileName) {
-      return 0L;
+   List<Long> extractPart1Seeds(String line) {
+      return List.of(line.split(" ")).stream()
+               .map(Long::parseLong)
+               .toList();
    }
 
    void accumulate(TransformAccumulator accumulator, String line) {
       if (line.isBlank()) return;
       if (line.startsWith("seeds: ")) {
-         List.of(line.substring(7).split(" ")).stream()
-               .map(Long::parseLong)
-               .forEach(accumulator.latched::add);
+         List<Long> seeds = accumulator.extractSeeds.apply(line.substring(7));
+         accumulator.latched.addAll(seeds);
          return;
       }
 
