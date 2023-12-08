@@ -64,7 +64,7 @@ public class Day5Part2 {
          long joinEnd = Math.min(endIndex, source.endIndex);
          long outerEnd = Math.max(endIndex, source.endIndex);
          long offset = joinStart - startIndex;
-         long joinLength = (joinEnd - joinStart);
+         long joinLength = joinEnd - joinStart;
          long destinationStart = destinationIndex + offset;
          long destinationEnd = destinationStart + joinLength;
 
