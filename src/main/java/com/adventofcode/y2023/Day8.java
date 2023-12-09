@@ -1,6 +1,5 @@
 package com.adventofcode.y2023;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +81,7 @@ public class Day8 {
          divisible = true;
 
          for (int index = 0; index < rights.length; index++) {
-            divisible = (lcm % values[index] == 0);
+            divisible = lcm % values[index] == 0;
 
             if (!divisible) {
                lcm += values[rights.length];

@@ -2,8 +2,6 @@ package com.adventofcode.y2023;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.math.BigInteger;
-
 import org.junit.jupiter.api.Test;
 
 class Day8Test {
