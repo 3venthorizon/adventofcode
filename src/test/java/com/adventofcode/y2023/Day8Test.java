@@ -33,15 +33,16 @@ class Day8Test {
 
    @Test
    void testExample3() {
-      BigInteger result = day8.part2("2023/day8/example3.input");
+      long result = day8.part2("2023/day8/example3.input");
 
-      assertEquals(BigInteger.valueOf(6L), result);
+      assertEquals(6L, result);
    }
 
    @Test
    void testPart2() {
-      BigInteger result = day8.part2("2023/day8/data.input");
+      long result = day8.part2("2023/day8/data.input");
 
       System.out.println("Day8 - Part2: " + result);
+      assertEquals(18215611419223L, result);
    }
 }

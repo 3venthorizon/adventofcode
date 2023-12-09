@@ -1,6 +1,7 @@
 package com.adventofcode.y2023;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class Day8 {
       return moves;
    }
 
-   public BigInteger part2(String fileName) {
+   public long part2(String fileName) {
       String directions = FileLineStreamer.read(fileName).findFirst().orElse("");
       Map<String, Options> optionMap = new HashMap<>();
       FileLineStreamer.read(fileName).skip(2L).forEach(line -> optionLoader(line, optionMap));
@@ -43,7 +44,7 @@ public class Day8 {
       List<String> nodes = optionMap.keySet().stream()
             .filter(node -> node.endsWith(start))
             .collect(Collectors.toList());
-      BigInteger coinsidence = BigInteger.valueOf(1);
+      long[] nodeMoves = new long[nodes.size()];
       
       for (int index = 0, length = nodes.size(); index < length; index++) {
          int moves = 0;
@@ -55,12 +56,10 @@ public class Day8 {
             moves++;
          } while (!node.endsWith(end));
          
-         coinsidence = coinsidence.multiply(BigInteger.valueOf(moves));
-
-         System.out.println(moves);
+         nodeMoves[index] = moves;
       }
 
-      return coinsidence;
+      return lcm(nodeMoves[0], nodeMoves);
    }
 
    void optionLoader(String line, Map<String, Options> optionMap) {
@@ -69,5 +68,29 @@ public class Day8 {
       if (nodeOptions.length < 3) return;
 
       optionMap.put(nodeOptions[INDEX_NODE], new Options(nodeOptions[INDEX_LEFT], nodeOptions[INDEX_RIGTT]));
+   }
+
+   public static long lcm(long left, long... rights) {
+      long[] values = new long[rights.length + 1];
+      values[0] = left;
+      System.arraycopy(rights, 0, values, 1, rights.length);
+      Arrays.sort(values);
+      long lcm = values[rights.length];
+      boolean divisible = false;
+
+      while (!divisible) {
+         divisible = true;
+
+         for (int index = 0; index < rights.length; index++) {
+            divisible = (lcm % values[index] == 0);
+
+            if (!divisible) {
+               lcm += values[rights.length];
+               break;
+            }
+         }
+      }
+
+      return lcm;
    }
 }
