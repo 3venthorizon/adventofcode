@@ -2,6 +2,8 @@ package com.adventofcode.y2023;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.math.BigInteger;
+
 import org.junit.jupiter.api.Test;
 
 class Day8Test {
@@ -31,16 +33,16 @@ class Day8Test {
 
    @Test
    void testExample3() {
-      long result = day8.part2("2023/day8/example3.input");
+      BigInteger result = day8.part2("2023/day8/example3.input");
 
-      assertEquals(6L, result);
+      assertEquals(BigInteger.valueOf(6L), result);
    }
 
    @Test
    void testPart2() {
-      long result = day8.part2("2023/day8/data.input");
+      BigInteger result = day8.part2("2023/day8/data.input");
 
       System.out.println("Day8 - Part2: " + result);
-      assertEquals(18215611419223L, result);
+      assertEquals(BigInteger.valueOf(18215611419223L), result);
    }
 }
