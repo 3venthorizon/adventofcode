@@ -10,8 +10,8 @@ class Day10Test {
    @Test
    void testExample1() {
       long result = day10.part1("2023/day10/example1.input");
-      
-      assertEquals(4L, result);
+
+      assertEquals(8L, result);
    }
 
    @Test

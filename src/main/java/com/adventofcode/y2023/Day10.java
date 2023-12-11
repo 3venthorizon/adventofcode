@@ -1,15 +1,14 @@
 package com.adventofcode.y2023;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class Day10 {
    record Grid(byte[] locations, int width, int heigt, int startIndex) {}
-
 
    public long part1(String fileName) {
       StringBuilder builder = new StringBuilder();
@@ -24,13 +23,23 @@ public class Day10 {
       int startIndex = builder.indexOf("S");
       Grid grid = new Grid(locations, width, height, startIndex);
       grid.locations[startIndex] = (byte) startPipe(grid);
-      counter.set(0);
+      Set<Integer> path = new HashSet<>();
+      path.add(startIndex);
+      search(startIndex, grid, path);
 
-      Function<Integer, List<Integer>> router = location -> routes(location, grid);
-      Predicate<Integer> destination = location -> destination(location, grid, counter);
-      List<Integer> path = Graph.breadthFirstSearch(startIndex, router, destination);
+      return path.size() / 2L;
+   }
 
-      return path.size() / 2L + 1L;
+   void search(int location, Grid map, Set<Integer> path) {
+      while (true) {
+         System.out.println("Location: " + location + " Pipe: " + String.valueOf((char) map.locations[location]));
+         List<Integer> options = routes(location, map);
+         options.removeAll(path);
+         if (options.isEmpty()) return;
+
+         location = options.get(0);
+         path.add(location);
+      } 
    }
 
    char startPipe(Grid map) {
@@ -75,12 +84,6 @@ public class Day10 {
          && westEast(map.locations[west], map.locations[location]))     options.add(west);
       if (x < map.width() - 1
          && westEast(map.locations[location], map.locations[east]))     options.add(east);
-
-      options = options.subList(0, 1);
-
-      System.out.println("Location: " + location + " [" 
-         + String.valueOf((char) map.locations[location]) + "] -> [" 
-         + String.valueOf((char) map.locations[options.get(0)]) + "]");
 
       return options;
    }
