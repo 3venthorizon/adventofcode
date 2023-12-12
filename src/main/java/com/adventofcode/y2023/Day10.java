@@ -1,9 +1,11 @@
 package com.adventofcode.y2023;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -23,16 +25,17 @@ public class Day10 {
       int startIndex = builder.indexOf("S");
       Grid grid = new Grid(locations, width, height, startIndex);
       grid.locations[startIndex] = (byte) startPipe(grid);
-      Set<Integer> path = new HashSet<>();
+      SortedSet<Integer> path = new TreeSet<>();
       path.add(startIndex);
       search(startIndex, grid, path);
+
+      printMap(path, grid);
 
       return path.size() / 2L;
    }
 
    void search(int location, Grid map, Set<Integer> path) {
       while (true) {
-         System.out.println("Location: " + location + " Pipe: " + String.valueOf((char) map.locations[location]));
          List<Integer> options = routes(location, map);
          options.removeAll(path);
          if (options.isEmpty()) return;
@@ -108,6 +111,27 @@ public class Day10 {
       
       List<Integer> options = routes(location, map);
       return options.contains(map.startIndex);
+   }
+   
+   void printMap(SortedSet<Integer> path, Grid map) {
+      StringBuilder rowBuilder = new StringBuilder(map.width);
+      char[] dots = new char[map.width];
+      Arrays.fill(dots, '.');
+      String dotted = new String(dots);
+      rowBuilder.append(dotted);
+
+      for (int height = 0; height < map.heigt; height++) {
+         rowBuilder.replace(0, map.width, dotted);
+
+         for (int width = 0; width < map.width; width++) {
+            int index = height * map.width + width;
+            if (!path.contains(index)) continue;
+
+            rowBuilder.setCharAt(width, (char) map.locations[index]);
+         }
+
+         System.out.println(rowBuilder.toString());
+      }
    }
 
    public long part2(String fileName) {
