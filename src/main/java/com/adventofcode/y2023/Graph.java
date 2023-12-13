@@ -37,7 +37,7 @@ public final class Graph {
       Optional<T> found = stream.filter(destination).findFirst();
       
       if (found.isPresent()) return traceRoute(routeMap, found.get()); 
-      if (nextSet.isEmpty()) return List.of();
+      if (nextSet.isEmpty()) return new ArrayList<>(routeMap.keySet());
       return bfs(routes, destination, nextSet, routeMap);
    }
    
