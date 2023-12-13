@@ -8,17 +8,17 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
-import com.adventofcode.y2023.Day10Part1.Grid;
+import com.adventofcode.y2023.Day10.Grid;
 
 class Day10Test {
-   static Day10Part1.Result result;
+   static Day10.Result result;
 
-   Day10Part1 day10part1 = new Day10Part1();
+   Day10 day10part1 = new Day10();
    Day10Part2 day10Part2 = new Day10Part2();
 
    @Test
    void testExample1() {
-      Day10Part1.Result result = day10part1.part1("2023/day10/example1.input");
+      Day10.Result result = day10part1.part1("2023/day10/example1.input");
       
       printMap(result);
       assertEquals(8L, result.path().size() / 2L);
@@ -46,7 +46,7 @@ class Day10Test {
       System.out.println("Insiders: " + insiders);
    }
 
-   void printMap(Day10Part1.Result result) {
+   void printMap(Day10.Result result) {
       Grid map = result.map();
       SortedSet<Integer> path = result.path();
       StringBuilder rowBuilder = new StringBuilder(map.width());

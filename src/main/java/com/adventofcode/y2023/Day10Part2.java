@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.adventofcode.y2023.Day10Part1.Grid;
+import com.adventofcode.y2023.Day10.Grid;
 
 public class Day10Part2 {
-   public SortedSet<Integer> part2(Day10Part1.Result result) {
+   public SortedSet<Integer> part2(Day10.Result result) {
       return new TreeSet<>(Graph.breadthFirstSearch(0, location -> routes(location, result), location -> false));
    }
 
-   List<Integer> routes(int location, Day10Part1.Result result) {
+   List<Integer> routes(int location, Day10.Result result) {
       Grid map = result.map();
       List<Integer> options = new ArrayList<>();
 

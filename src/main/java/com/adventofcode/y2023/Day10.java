@@ -8,7 +8,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-public class Day10Part1 {
+public class Day10 {
    public record Result(SortedSet<Integer> path, Grid map) {}
 
    record Grid(byte[] locations, int width, int heigt, int startIndex) {}
