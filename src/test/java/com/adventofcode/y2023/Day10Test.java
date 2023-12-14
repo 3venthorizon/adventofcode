@@ -3,22 +3,19 @@ package com.adventofcode.y2023;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
 import com.adventofcode.y2023.Day10.Grid;
 
 class Day10Test {
-   static Day10.Result result;
-
-   Day10 day10part1 = new Day10();
-   Day10Part2 day10Part2 = new Day10Part2();
+   Day10 day10 = new Day10();
 
    @Test
    void testExample1() {
-      Day10.Result result = day10part1.part1("2023/day10/example1.input");
+      Day10.Result result = day10.part1("2023/day10/example1.input");
       
       printMap(result);
       assertEquals(8L, result.path().size() / 2L);
@@ -26,7 +23,7 @@ class Day10Test {
    
    @Test
    void testPart1() {
-      result = day10part1.part1("2023/day10/data.input");
+      Day10.Result result = day10.part1("2023/day10/data.input");
       System.out.println("Day10 - Part1: " + result.path().size() / 2L);
       printMap(result);
 
@@ -35,20 +32,21 @@ class Day10Test {
 
    @Test
    void testPart2() {
-      result = day10part1.part1("2023/day10/data.input");
-      SortedSet<Integer> outsiders = day10Part2.part2(result);
-      
+      Day10.Result result = day10.part1("2023/day10/data.input");
+      SortedSet<Integer> insiders = day10.part2(result);
+
+      System.out.println("Day10 - Part2: " + insiders.size());
+
+      insiders.stream().forEach(insider -> result.map().locations()[insider] = '*');
+      result.path().addAll(insiders);
+
       printMap(result);
-      System.out.println("Total: " + result.map().locations().length);
-      System.out.println("Outsiders: " + outsiders.size());
-      System.out.println("Paths: " + result.path().size());
-      long insiders = result.map().locations().length - outsiders.size() - result.path().size();
-      System.out.println("Insiders: " + insiders);
+      assertEquals(511L, insiders.size());
    }
 
    void printMap(Day10.Result result) {
       Grid map = result.map();
-      SortedSet<Integer> path = result.path();
+      List<Integer> path = result.path();
       StringBuilder rowBuilder = new StringBuilder(map.width());
       char[] dots = new char[map.width()];
       Arrays.fill(dots, '.');

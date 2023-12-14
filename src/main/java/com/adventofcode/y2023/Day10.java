@@ -2,16 +2,20 @@ package com.adventofcode.y2023;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Day10 {
-   public record Result(SortedSet<Integer> path, Grid map) {}
+   public record Result(List<Integer> path, Grid map) {}
 
    record Grid(byte[] locations, int width, int heigt, int startIndex) {}
+
+   record Directions(int x, int y, int north, int south, int west, int east) {}
+
+   record Orientation(int port, int starboard) {}
 
    public Result part1(String fileName) {
       StringBuilder builder = new StringBuilder();
@@ -26,93 +30,170 @@ public class Day10 {
       int startIndex = builder.indexOf("S");
       Grid grid = new Grid(locations, width, height, startIndex);
       grid.locations[startIndex] = (byte) startPipe(grid);
-      SortedSet<Integer> path = new TreeSet<>();
-      path.add(startIndex);
-      search(startIndex, grid, path);
+      List<Integer> path = searchPart1(startIndex, grid);
 
       return new Result(path, grid);
    }
 
-   void search(int location, Grid map, Set<Integer> path) {
+   List<Integer> searchPart1(int location, Grid map) {
+      SortedSet<Integer> visited = new TreeSet<>();
+      List<Integer> path = new ArrayList<>();
+      visited.add(location);
+      path.add(location);
+
       while (true) {
-         List<Integer> options = routes(location, map);
-         options.removeAll(path);
-         if (options.isEmpty()) return;
+         Directions directions = directions(location, map.width());
+         List<Integer> options = pipeRoutes(location, map, directions);
+         options.removeIf(visited::contains);
+
+         if (options.isEmpty()) return path;
 
          location = options.get(0);
+         visited.add(location);
          path.add(location);
       } 
    }
 
    char startPipe(Grid map) {
-      int x = map.startIndex % map.width;
-      int y = map.startIndex / map.width;
-      int north = (y - 1) * map.width + x;
-      int south = (y + 1) * map.width + x;
-      int west = y * map.width + (x - 1);
-      int east = y * map.width + (x + 1);
+      Directions directions = directions(map.startIndex(), map.width());
 
-      if (northSouth('|', map.locations[south])
-         && northSouth(map.locations[north], '|')) return '|';
-      if (westEast('-', map.locations[east])
-         && westEast(map.locations[west], '-')) return '-';
-      if (northSouth('F', map.locations[south])
-         && westEast('F', map.locations[east])) return 'F';
-      if (northSouth(map.locations[north], 'L')
-         && westEast('L', map.locations[east])) return 'L';
-      if (northSouth(map.locations[north], 'J')
-         && westEast(map.locations[west], 'J')) return 'J';
-      if (northSouth('7', map.locations[south])
-         && westEast(map.locations[west], '7')) return '7';
+      if (northSouth('|', (char) map.locations[directions.south()])
+         && northSouth((char) map.locations[directions.north()], '|')) return '|';
+      if (westEast('-', (char) map.locations[directions.east()])
+         && westEast((char) map.locations[directions.west()], '-')) return '-';
+      if (northSouth('F', (char) map.locations[directions.south()])
+         && westEast('F', (char) map.locations[directions.east()])) return 'F';
+      if (northSouth((char) map.locations[directions.north()], 'L')
+         && westEast('L', (char) map.locations[directions.east()])) return 'L';
+      if (northSouth((char) map.locations[directions.north()], 'J')
+         && westEast((char) map.locations[directions.west()], 'J')) return 'J';
+      if (northSouth('7', (char) map.locations[directions.south()])
+         && westEast((char) map.locations[directions.west()], '7')) return '7';
 
       return 'S';
    }
 
-   List<Integer> routes(int location, Grid map) {
+   List<Integer> pipeRoutes(int location, Grid map, Directions directions) {
       List<Integer> options = new ArrayList<>();
+      char current = (char) map.locations()[location];
 
-      int x = location % map.width;
-      int y = location / map.width;
-      int north = (y - 1) * map.width + x;
-      int south = (y + 1) * map.width + x;
-      int west = y * map.width + (x - 1);
-      int east = y * map.width + (x + 1);
-
-      if (north > 0 
-         && northSouth(map.locations[north], map.locations[location]))  options.add(north);
-      if (south < map.locations.length
-         && northSouth(map.locations[location], map.locations[south]))  options.add(south);
-      if (x > 0
-         && westEast(map.locations[west], map.locations[location]))     options.add(west);
-      if (x < map.width() - 1
-         && westEast(map.locations[location], map.locations[east]))     options.add(east);
+      if (directions.north() >= 0) {
+         char north = (char) map.locations[directions.north()];
+         if (northSouth(north, current)) options.add(directions.north());
+      }
+      if (directions.south() < map.locations.length) {
+         char south = (char) map.locations[directions.south()];
+         if (northSouth(current, south)) options.add(directions.south());
+      }
+      if (directions.x() > 0) {
+         char west = (char) map.locations[directions.west()];
+         if (westEast(west, current)) options.add(directions.west());
+      }
+      if (directions.x() < map.width() - 1) {
+         char east = (char) map.locations[directions.east()];
+         if (westEast(current, east)) options.add(directions.east());
+      }
 
       return options;
    }
 
-   boolean northSouth(int north, int south) {
+   boolean northSouth(char north, char south) {
       return switch (north) {
          case '|', 'F', '7' -> (south == '|' || south == 'L' || south == 'J');
          default -> false;
       };
    }
 
-   boolean westEast(int west, int east) {
+   boolean westEast(char west, char east) {
       return switch (west) {
          case '-', 'F', 'L' -> (east == '-' || east == '7' || east == 'J');
          default -> false;
       };
    }
 
-   boolean destination(int location, Grid map, AtomicInteger counter) {
-      int count = counter.incrementAndGet();
-      if (count <= 4) return false;
+   public SortedSet<Integer> part2(Result result) {
+      Grid map = result.map();
+      SortedSet<Integer> port = new TreeSet<>();
+      SortedSet<Integer> starboard = new TreeSet<>();
+      List<Integer> path = result.path();
+      SortedSet<Integer> trail = new TreeSet<>(path);
       
-      List<Integer> options = routes(location, map);
-      return options.contains(map.startIndex);
+      for (int index = 1, count = path.size(); index < count; index++) {
+         int aft = path.get(index - 1);
+         int bow = path.get(index);
+         Orientation orientation = orientation(aft, bow, map.width(), map.heigt());
+         int bowPort = bow + orientation.port();
+         int bowStarboard = bow + orientation.starboard();
+         int aftPort = aft + orientation.port();
+         int aftStarboard = aft + orientation.starboard();
+
+         if (!trail.contains(bowPort)) port.add(bowPort);
+         if (!trail.contains(aftPort)) port.add(aftPort);
+         if (!trail.contains(bowStarboard)) starboard.add(bowStarboard);
+         if (!trail.contains(aftStarboard)) starboard.add(aftStarboard);
+      }
+
+      SortedSet<Integer> siders = port.size() < starboard.size() ? port : starboard;
+      SortedSet<Integer> outsiders = port.size() > starboard.size() ? port : starboard;
+      SortedSet<Integer> insiders = new TreeSet<>();
+      Function<Integer, List<Integer>> router = location -> insideRoutes(location, map, trail, outsiders);
+
+      for (Integer side : siders) {
+         if (insiders.contains(side)) continue;
+
+         List<Integer> locations = Graph.breadthFirstSearch(side, router, location -> false);
+         insiders.add(side);
+         insiders.addAll(locations);
+      }
+
+      return insiders;
    }
 
-   public long part2(String fileName) {
-      return 0L;
+   List<Integer> insideRoutes(int location, Grid map, 
+         SortedSet<Integer> trail, SortedSet<Integer> outsiders) {
+      Directions directions = directions(location, map.width());
+      List<Integer> routes = new ArrayList<>();
+
+      if (directions.north() >= 0) routes.add(directions.north());
+      if (directions.south() < map.locations().length) routes.add(directions.south());
+      if (directions.x() > 0) routes.add(directions.west);
+      if (directions.x() < map.width() - 1) routes.add(directions.east());
+
+      routes.removeIf(trail::contains);
+      routes.removeIf(outsiders::contains);
+
+      return routes;
+   }
+
+   static Directions directions(int location, int width) {
+      int x = location % width;
+      int y = location / width;
+      int north = (y - 1) * width + x;
+      int south = (y + 1) * width + x;
+      int west = y * width + (x - 1);
+      int east = y * width + (x + 1);
+
+      return new Directions(x, y, north, south, west, east);
+   }
+
+   static Orientation orientation(int aft, int bow, int width, int height) {
+      int x = bow % width;
+      int y = bow / width;
+      int dx = (aft % width) - (bow % width);
+      int dy = (aft / width) - (bow / width);
+
+      int port = 0;                    
+      int portX = x + dy;                             
+      int portY = y - dx;                             
+      port += (portX >= 0 && portX < width) ? dy : 0; 
+      port -= (portY >= 0 && portY < height) ? dx * width : 0;
+
+      int starboard = 0;
+      int starboardX = x - dy;
+      int starboardY = y + dx;
+      starboard -= (starboardX >= 0 && starboardX < width) ? dy : 0;
+      starboard += (starboardY >= 0 && starboardY < height) ? dx * width : 0;
+
+      return new Orientation(port, starboard);
    }
 }
