@@ -35,7 +35,7 @@ public class Day3Part1 {
       long sum = 0L;
       if (numberLine == null || symbolLine == null) return sum;
       Matcher numberMatcher = PATTERN_NUMBER.matcher(numberLine);
-      
+
       while (numberMatcher.find()) {
          int start = Math.max(0, numberMatcher.start() - 1);
          int end = Math.min(symbolLine.length(), numberMatcher.end() + 1);

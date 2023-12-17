@@ -1,7 +1,7 @@
 package com.adventofcode.y2023;
 
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +46,7 @@ public class Day8 {
             .filter(node -> node.endsWith(start))
             .collect(Collectors.toList());
       BigInteger[] nodeMoves = new BigInteger[nodes.size()];
-      
+
       for (int index = 0, length = nodes.size(); index < length; index++) {
          int moves = 0;
          String node = nodes.get(index);
@@ -56,11 +56,11 @@ public class Day8 {
             node = directions.charAt(moves % count) == 'L' ? options.left : options.right;
             moves++;
          } while (!node.endsWith(end));
-         
+
          nodeMoves[index] = BigInteger.valueOf(moves);
       }
 
-      return lcm(nodeMoves);
+      return lcm(List.of(nodeMoves));
    }
 
    void optionLoader(String line, Map<String, Options> optionMap) {
@@ -77,14 +77,10 @@ public class Day8 {
       return product.abs().divide(gcd);
    }
 
-   public static BigInteger lcm(BigInteger[] numbers) {
-      Arrays.sort(numbers, Comparator.reverseOrder());
-      BigInteger lcm = numbers[0];
-
-      for (BigInteger number : Arrays.copyOfRange(numbers, 1, numbers.length)) {
-         lcm = lcm(lcm, number);
-      }
-
-      return lcm;
+   public static BigInteger lcm(Collection<BigInteger> numbers) {
+      return numbers.stream()
+            .sorted(Comparator.reverseOrder())
+            .reduce(Day8::lcm)
+            .orElse(BigInteger.ZERO);
    }
 }
