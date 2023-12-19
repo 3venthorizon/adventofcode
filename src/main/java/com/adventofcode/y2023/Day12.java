@@ -1,5 +1,6 @@
 package com.adventofcode.y2023;
 
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Day12 {
@@ -20,6 +21,15 @@ public class Day12 {
    }
 
    long countArrangements(Groups groups) {
+      int minLength = IntStream.of(groups.groupSizes()).sum() + groups.groupSizes.length - 1;
+      int radix = groups.partial.length() - minLength;
+      if (radix == 0) return 1L;
+
+      int digits = groups.groupSizes.length + 1;
+      int[] numberSystem = new int[digits];
+      int[] radixes = new int[digits];
+
+
       return 0L;
    }
 
