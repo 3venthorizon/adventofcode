@@ -6,6 +6,8 @@ import java.util.stream.Stream;
 public class Day12 {
    record Groups(String partial, int[] groupSizes) {}
 
+   record Arrangement(int[] numbers, int index) {}
+
    public long part1(String fileName) {
       return FileLineStreamer.read(fileName)
             .map(this::extract)
@@ -23,11 +25,14 @@ public class Day12 {
    long countArrangements(Groups groups) {
       int minLength = IntStream.of(groups.groupSizes()).sum() + groups.groupSizes.length - 1;
       int radix = groups.partial.length() - minLength;
-      if (radix == 0) return 1L;
+      if (radix <= 0) return 1L;
 
       int digits = groups.groupSizes.length + 1;
       int[] numberSystem = new int[digits];
-      int[] radixes = new int[digits];
+
+      numberSystem[0] = radix;
+      numberSystem[groups.groupSizes.length] = 0;
+      IntStream.range(1, groups.groupSizes.length).forEach(index -> numberSystem[index] = 1);
 
 
       return 0L;
