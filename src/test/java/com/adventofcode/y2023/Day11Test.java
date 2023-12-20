@@ -28,5 +28,6 @@ class Day11Test {
       long result = day11.part2("2023/day11/data.input");
 
       System.out.println("Day11 - Part2: " + result);
+      assertEquals(692506533832L, result);
    }
 }

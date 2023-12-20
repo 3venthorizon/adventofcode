@@ -1,17 +1,41 @@
 package com.adventofcode.y2023;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Day12 {
+   record Arrangement(int[] groupSizes, int[] numbers, int digit) {
+      public String toString() {
+         StringBuilder builder = new StringBuilder();
+         
+         for (int index = 0; index < groupSizes.length; index++) {
+            char[] dots = new char[numbers[groupSizes.length - index]];
+            char[] hash = new char[groupSizes[index]];
+            Arrays.fill(dots, '.');
+            Arrays.fill(hash, '#');
 
-   record Arrangement(int[] numbers, int digit) {}
+            builder.append(dots).append(hash);
+         }
+
+         char[] dots = new char[numbers[0]];
+         Arrays.fill(dots, '.');
+         builder.append(dots);
+
+         return builder.toString();
+      }
+   }
 
    public long part1(String fileName) {
-
-      return 0L;
+      return FileLineStreamer.read(fileName)
+            .mapToLong(this::countArrangements)
+            .sum();
    }
 
    long countArrangements(String line) {
@@ -29,26 +53,70 @@ public class Day12 {
       numbers[0] = radix;
       numbers[groupSizes.length] = 0;
       IntStream.range(1, groupSizes.length).forEach(index -> numbers[index] = 1);
+      Pattern pattern = compose(groupSizes);
+      Arrangement arrangement = new Arrangement(groupSizes, numbers, digits);
+      List<Arrangement> list = enumerate(partial, pattern, arrangement);
+      if (validate(partial, arrangement.toString(), pattern)) list.add(0, arrangement);
 
-      Arrangement arrangement = new Arrangement(numbers, digits);
-
-      return 0L;
+      return list.size();
    }
 
    Pattern compose(int[] groupSizes) {
-
-      return null;
+      String regex = IntStream.of(groupSizes)
+            .mapToObj(size -> "#{" + size + "}")
+            .collect(Collectors.joining("\\.+"));
+      return Pattern.compile(regex);
    }
 
-   boolean isValid(String partial, Arrangement arrangement, Pattern pattern) {
-      return false;
+   boolean validate(String partial, String arrangement, Pattern pattern) {
+      StringBuilder builder = new StringBuilder(arrangement);
+
+      for (int index = 0, count = partial.length(); index < count; index++) {
+         char override = partial.charAt(index);
+         if (override == '?') continue;
+         if (override != arrangement.charAt(index)) return false;
+      }
+
+      String result = builder.toString();
+      Matcher matcher = pattern.matcher(result);
+      if (!matcher.find()) return false;
+
+      return Stream.of(result.split(pattern.pattern())).noneMatch(padding -> padding.contains("#"));
    }
 
-   List<Arrangement> enumerate(Arrangement arrangement) {
-      return List.of();
+   List<Arrangement> enumerate(String partial, Pattern pattern, Arrangement arrangement) {
+      List<Arrangement> list = new ArrayList<>();
+      int remainder = arrangement.numbers[0];
+      if (remainder == 0) return list;
+      
+      for (int index = 1; index < arrangement.digit; index++) {
+         int[] generated = Arrays.copyOf(arrangement.numbers, arrangement.numbers.length);
+         generated[0] -= 1;
+         generated[index] += 1;
+
+         Arrangement sub = new Arrangement(arrangement.groupSizes, generated, index + 1);
+         if (validate(partial, sub.toString(), pattern)) list.add(sub);
+         list.addAll(enumerate(partial, pattern, sub));
+      }
+
+      return list;
    }
 
-   public long part2() {
-      return 0L;
+   public BigInteger part2(String fileName) {
+      return FileLineStreamer.read(fileName)
+            .map(this::unfold)
+            .reduce(BigInteger::add)
+            .orElse(BigInteger.ZERO);
+   }
+
+   BigInteger unfold(String line) {
+      BigInteger arrangements = BigInteger.valueOf(countArrangements(line));
+
+      String[] records = line.split(" ");
+      String partial = records[0];
+      String groups = records[1];
+      BigInteger unfolded24 = BigInteger.valueOf(countArrangements('?' + partial + " " + groups));
+
+      return arrangements.multiply(unfolded24.pow(4));
    }
 }
