@@ -110,13 +110,15 @@ public class Day12 {
    }
 
    BigInteger unfold(String line) {
-      BigInteger arrangements = BigInteger.valueOf(countArrangements(line));
+      long arrangements = countArrangements(line);
 
       String[] records = line.split(" ");
       String partial = records[0];
       String groups = records[1];
-      BigInteger unfolded24 = BigInteger.valueOf(countArrangements('?' + partial + " " + groups));
+      String unfoldLine = partial + '?' + partial + " " + groups + ',' + groups;
+      long unfolded = countArrangements(unfoldLine);
+      BigInteger multiplier = BigInteger.valueOf(unfolded / arrangements);
 
-      return arrangements.multiply(unfolded24.pow(4));
+      return BigInteger.valueOf(arrangements).multiply(multiplier.pow(4));
    }
 }
