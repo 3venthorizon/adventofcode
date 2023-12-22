@@ -11,13 +11,15 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Day12 {
-   record Arrangement(int[] groupSizes, int[] numbers, int digit) {
+   record Record(String partial, int[] groupSizes) {}
+
+   record Arrangement(Record line, int[] numbers, int digit) {
       public String toString() {
          StringBuilder builder = new StringBuilder();
-         
-         for (int index = 0; index < groupSizes.length; index++) {
-            char[] dots = new char[numbers[groupSizes.length - index]];
-            char[] hash = new char[groupSizes[index]];
+
+         for (int index = 0; index < line.groupSizes.length; index++) {
+            char[] dots = new char[numbers[line.groupSizes.length - index]];
+            char[] hash = new char[line.groupSizes[index]];
             Arrays.fill(dots, '.');
             Arrays.fill(hash, '#');
 
@@ -34,31 +36,46 @@ public class Day12 {
 
    public long part1(String fileName) {
       return FileLineStreamer.read(fileName)
-            .mapToLong(this::countArrangements)
-            .sum();
+            .map(this::extract)
+            .map(this::countArrangements)
+            .flatMap(List::stream)
+            .count();
    }
 
-   long countArrangements(String line) {
+   Record extract(String line) {
       String[] records = line.split(" ");
       String partial = records[0];
-      String[] sizes = records[1].split(",");
+      String groups = records[1];
+      String[] sizes = groups.split(",");
       int[] groupSizes = Stream.of(sizes).mapToInt(Integer::parseInt).toArray();
-      int minLength = IntStream.of(groupSizes).sum() + groupSizes.length - 1;
-      int radix = partial.length() - minLength;
-      if (radix <= 0) return 1L;
 
-      int digits = groupSizes.length + 1;
+      return new Record(partial, groupSizes);
+   }
+
+   Arrangement root(Record line) {
+      int minLength = IntStream.of(line.groupSizes).sum() + line.groupSizes.length - 1;
+      int radix = line.partial.length() - minLength;
+      int digits = line.groupSizes.length + 1;
       int[] numbers = new int[digits];
-
       numbers[0] = radix;
-      numbers[groupSizes.length] = 0;
-      IntStream.range(1, groupSizes.length).forEach(index -> numbers[index] = 1);
-      Pattern pattern = compose(groupSizes);
-      Arrangement arrangement = new Arrangement(groupSizes, numbers, digits);
-      List<Arrangement> list = enumerate(partial, pattern, arrangement);
-      if (validate(partial, arrangement.toString(), pattern)) list.add(0, arrangement);
+      numbers[line.groupSizes.length] = 0;
+      IntStream.range(1, line.groupSizes.length).forEach(index -> numbers[index] = 1);
 
-      return list.size();
+      return new Arrangement(line, numbers, digits);
+   }
+
+   List<Arrangement> countArrangements(Record line) {
+      Arrangement arrangement = root(line);
+      int minLength = IntStream.of(line.groupSizes).sum() + line.groupSizes.length - 1;
+      int radix = line.partial.length() - minLength;
+
+      if (radix <= 0) return List.of(arrangement);
+
+      Pattern pattern = compose(line.groupSizes);
+      List<Arrangement> list = enumerate(line.partial, pattern, arrangement);
+      if (validate(line.partial, arrangement.toString(), pattern)) list.add(0, arrangement);
+
+      return list;
    }
 
    Pattern compose(int[] groupSizes) {
@@ -88,13 +105,13 @@ public class Day12 {
       List<Arrangement> list = new ArrayList<>();
       int remainder = arrangement.numbers[0];
       if (remainder == 0) return list;
-      
+
       for (int index = 1; index < arrangement.digit; index++) {
          int[] generated = Arrays.copyOf(arrangement.numbers, arrangement.numbers.length);
          generated[0] -= 1;
          generated[index] += 1;
 
-         Arrangement sub = new Arrangement(arrangement.groupSizes, generated, index + 1);
+         Arrangement sub = new Arrangement(arrangement.line, generated, index + 1);
          if (validate(partial, sub.toString(), pattern)) list.add(sub);
          list.addAll(enumerate(partial, pattern, sub));
       }
@@ -104,21 +121,19 @@ public class Day12 {
 
    public BigInteger part2(String fileName) {
       return FileLineStreamer.read(fileName)
+            .map(this::extract)
             .map(this::unfold)
             .reduce(BigInteger::add)
             .orElse(BigInteger.ZERO);
    }
 
-   BigInteger unfold(String line) {
-      long arrangements = countArrangements(line);
+   BigInteger unfold(Record line) {
+      Record extended = new Record('?' + line.partial, line.groupSizes);
 
-      String[] records = line.split(" ");
-      String partial = records[0];
-      String groups = records[1];
-      String unfoldLine = partial + '?' + partial + " " + groups + ',' + groups;
-      long unfolded = countArrangements(unfoldLine);
-      BigInteger multiplier = BigInteger.valueOf(unfolded / arrangements);
+      List<Arrangement> arrangements = countArrangements(line);
+      List<Arrangement> extendedList = countArrangements(extended);
 
-      return BigInteger.valueOf(arrangements).multiply(multiplier.pow(4));
+
+      return BigInteger.valueOf(1);
    }
 }

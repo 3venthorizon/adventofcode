@@ -15,7 +15,7 @@ class Day12Test {
    void testCompose() {
       int[] groupSizes = {2, 1, 5, 3, 4};
       Pattern pattern = day12.compose(groupSizes);
-      
+
       assertEquals("#{2}\\.+#{1}\\.+#{5}\\.+#{3}\\.+#{4}", pattern.pattern());
    }
 
@@ -47,39 +47,39 @@ class Day12Test {
    @Test
    void testGenerateArrangement() {
       int[] groupSizes = { 3, 2, 1 };
+      Day12.Record line = new Day12.Record(null, groupSizes);
       int[] numbers = { 0, 2, 3, 1 };
-      Day12.Arrangement arrangement = new Day12.Arrangement(groupSizes, numbers, 0);
+      Day12.Arrangement arrangement = new Day12.Arrangement(line, numbers, 0);
 
       assertEquals(".###...##..#", arrangement.toString());
    }
 
    @Test
    void testEnumerateArrangements() {
-      String partial = "???????";
-      int[] groupSizes = { 1, 1, 1 };
-      int[] numbers = { 2, 1, 1, 0 }; 
-      Day12.Arrangement arrangement = new Day12.Arrangement(groupSizes, numbers, numbers.length);
-      Pattern pattern = day12.compose(groupSizes);
+      String partial = "??????? 1,1,1";
+      Day12.Record line = day12.extract(partial);
+      int[] numbers = { 2, 1, 1, 0 };
+      Day12.Arrangement arrangement = new Day12.Arrangement(line, numbers, numbers.length);
+      Pattern pattern = day12.compose(line.groupSizes());
 
       System.out.println(arrangement.toString());
 
-      List<Day12.Arrangement> resultList = day12.enumerate(partial, pattern, arrangement);
+      List<Day12.Arrangement> resultList = day12.enumerate(line.partial(), pattern, arrangement);
 
       assertEquals(9L, resultList.size());
    }
 
    @Test
    void testEnumerateDebug() {
-      String partial = ".??..??...?##.";
-      int[] groupSizes = { 1, 1, 3 };
+      String partial = ".??..??...?##. 1,1,3";
+      Day12.Record line = day12.extract(partial);
       int[] numbers = { 7, 1, 1, 0 };
-
-      Day12.Arrangement arrangement = new Day12.Arrangement(groupSizes, numbers, numbers.length);
-      Pattern pattern = day12.compose(groupSizes);
+      Day12.Arrangement arrangement = new Day12.Arrangement(line, numbers, numbers.length);
+      Pattern pattern = day12.compose(line.groupSizes());
 
       System.out.println(arrangement.toString());
 
-      List<Day12.Arrangement> resultList = day12.enumerate(partial, pattern, arrangement);
+      List<Day12.Arrangement> resultList = day12.enumerate(line.partial(), pattern, arrangement);
 
       assertEquals(4L, resultList.size());
    }
