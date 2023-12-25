@@ -37,7 +37,7 @@ public class Day12 {
    public long part1(String fileName) {
       return FileLineStreamer.read(fileName)
             .map(this::extract)
-            .map(this::countArrangements)
+            .map(this::enumerateArrangements)
             .flatMap(List::stream)
             .count();
    }
@@ -64,7 +64,7 @@ public class Day12 {
       return new Arrangement(line, numbers, digits);
    }
 
-   List<Arrangement> countArrangements(Record line) {
+   List<Arrangement> enumerateArrangements(Record line) {
       Arrangement arrangement = root(line);
       int minLength = IntStream.of(line.groupSizes).sum() + line.groupSizes.length - 1;
       int radix = line.partial.length() - minLength;
@@ -129,9 +129,13 @@ public class Day12 {
 
    BigInteger unfold(Record line) {
       Record extended = new Record('?' + line.partial, line.groupSizes);
+      List<Arrangement> arrangements = enumerateArrangements(line);
+      List<Arrangement> extendedList = enumerateArrangements(extended);
 
-      List<Arrangement> arrangements = countArrangements(line);
-      List<Arrangement> extendedList = countArrangements(extended);
+      int[] doubled = IntStream.concat(IntStream.of(line.groupSizes), IntStream.of(line.groupSizes)).toArray();
+      Record unfold = new Record(line.partial + '?' + line.partial, doubled);
+      List<Arrangement> huge = enumerateArrangements(unfold);
+
 
 
       return BigInteger.valueOf(1);

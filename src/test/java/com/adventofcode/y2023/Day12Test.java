@@ -3,10 +3,13 @@ package com.adventofcode.y2023;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
+
+import com.adventofcode.y2023.Day12.Arrangement;
 
 class Day12Test {
    Day12 day12 = new Day12();
@@ -92,6 +95,21 @@ class Day12Test {
    }
 
    @Test
+   void testPrint() {
+      String text = "??????? 1,1,1";
+      Day12.Record line = day12.extract(text);
+      List<Day12.Arrangement> arrangements = day12.enumerateArrangements(line);
+      printArrangements(arrangements);
+      System.out.println();
+
+      text = "?????????? 1,1,1,1";
+      line = day12.extract(text);
+      arrangements = day12.enumerateArrangements(line);
+      printArrangements(arrangements);
+      System.out.println();
+   }
+
+   @Test
    void testPart1() {
       long result = day12.part1("2023/day12/data.input");
 
@@ -101,7 +119,7 @@ class Day12Test {
 
    @Test
    void testExample2() {
-      BigInteger result = day12.part2("2023/day12/example1.input");
+      BigInteger result = day12.part2("2023/day12/example2.input");
 
       assertEquals(BigInteger.valueOf(525152L), result);
    }
@@ -111,5 +129,20 @@ class Day12Test {
       BigInteger result = day12.part2("2023/day12/data.input");
 
       System.out.println("Day12 - Part2: " + result);
+   }
+
+
+   void printArrangements(List<Arrangement> arrangements) {
+      Day12.Arrangement zeroArrangement = arrangements.get(0);
+      int root = zeroArrangement.numbers()[0];
+
+      for (Day12.Arrangement arrangement : arrangements) {
+         int[] numbers = arrangement.numbers();
+         int level = root - numbers[0];
+         char[] tabs = new char[level];
+         Arrays.fill(tabs, '\t');
+         System.out.print(tabs);
+         System.out.println(arrangement.toString());
+      }
    }
 }
