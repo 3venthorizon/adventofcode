@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.adventofcode</groupId>
     <artifactId>2024</artifactId>
-    <version>December.01</version>
+    <version>December.02</version>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
