@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/// https://adventofcode.com/2024/day/5
 public class Day5 {
    record Rule(String before, String after) {}
 

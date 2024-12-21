@@ -5,9 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-/**
- * https://adventofcode.com/2024/day/4
- */
+/// https://adventofcode.com/2024/day/4
 public class Day4 {
    enum Direction {
       NORTH(0, -1),

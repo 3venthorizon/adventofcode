@@ -38,7 +38,6 @@
       <property name="tokens" value="LITERAL_DO,LITERAL_FOR,LITERAL_WHILE"/>
       <property name="allowSingleLineStatement" value="true"/>
     </module>
-    <module name="AvoidEscapedUnicodeCharacters"/>
     <module name="InterfaceIsType"/>
     <module name="FinalClass"/>
     <module name="OuterTypeNumber"/>
