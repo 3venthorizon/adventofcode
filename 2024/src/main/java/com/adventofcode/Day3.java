@@ -25,9 +25,7 @@ public class Day3 {
       FileLineStreamer.read(filename)
             .forEach(line -> stringBuilder.append(line).append('\n'));
       String instructions = stringBuilder.toString();
-      System.out.println(instructions);
       instructions = instructions.replaceAll("don't\\(\\)(.|\n)+?do\\(\\)", "skip");
-      System.out.println(instructions);
       
       return extractMul(instructions).stream()
             .mapToLong(this::executeMul)
