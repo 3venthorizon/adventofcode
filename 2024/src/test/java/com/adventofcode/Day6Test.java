@@ -20,6 +20,12 @@ class Day6Test {
    }
 
    @Test
+   void testExample3() {
+      long result = day6.part2("day6_example2.input");
+      assertEquals(1L, result);
+   }
+
+   @Test
    void testPart1() {
       long result = day6.part1("day6.input");
       assertEquals(4973L, result);
@@ -28,6 +34,6 @@ class Day6Test {
    @Test
    void testPart2() {
       long result = day6.part2("day6.input");
-      assertEquals(1618L, result);
+      assertEquals(1482L, result);
    }
 }
