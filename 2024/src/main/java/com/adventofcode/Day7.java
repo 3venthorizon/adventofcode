@@ -4,29 +4,40 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BinaryOperator;
 import java.util.function.LongBinaryOperator;
-import java.util.stream.Gatherers;
-import java.util.stream.IntStream;
 
 /// https://adventofcode.com/2024/day/7
 public class Day7 {
-   final int OPERATOR_ADD = 0;
-   final int OPERATOR_MUL = 1;
+   enum Operator {
+      ADD(Math::addExact), 
+      MULTIPLY(Math::multiplyExact), 
+      CONCAT((left, right) -> Long.parseLong(Long.toString(left) + Long.toString(right)));
+
+      public final LongBinaryOperator operator;
+      
+      Operator(LongBinaryOperator operator) {
+         this.operator = operator;
+      }
+   }
 
    record Equation(long answer, List<Long> numbers) {}
 
    public long part1(String filename) {
       return FileLineStreamer.read(filename)
             .map(this::extract)
-            .filter(this::evaluate)
+            .filter(equation -> evaluate(equation, List.of(Operator.ADD, Operator.MULTIPLY)))
             .map(Equation::answer)
             .mapToLong(Long::longValue)
             .sum();
    }
 
-   public static long part2(String filename) {
-      return 0L;
+   public long part2(String filename) {
+      return FileLineStreamer.read(filename)
+            .map(this::extract)
+            .filter(equation -> evaluate(equation, List.of(Operator.ADD, Operator.MULTIPLY, Operator.CONCAT)))
+            .map(Equation::answer)
+            .mapToLong(Long::longValue)
+            .sum();
    }
 
    Equation extract(String line) {
@@ -38,33 +49,29 @@ public class Day7 {
       return new Equation(answer, numbers);
    }
 
-   boolean evaluate(Equation equation) {
+   boolean evaluate(Equation equation, List<Operator> operators) {
       int operatorCount = equation.numbers().size() - 1;
-      int enumeratedCount = IntStream.range(0, operatorCount).reduce(1, (acc, _) -> acc << 1);
+      int enumeratedCount = (int) Math.pow(operators.size(), operatorCount);
 
       for (int x = 0; x < enumeratedCount; x++) {
-         List<LongBinaryOperator> operators = operators(x, operatorCount);
-         long calculated = calculate(equation.numbers(), operators);
+         List<LongBinaryOperator> operatorsList = operators(operators, x, operatorCount);
+         long calculated = calculate(equation.numbers(), operatorsList);
          if (calculated == equation.answer()) return true;
       }
 
       return false;
    }
 
-   List<LongBinaryOperator> operators(int enumeration, int size) {
-      List<LongBinaryOperator> operators = new ArrayList<>();
+   List<LongBinaryOperator> operators(List<Operator> operators, int enumeration, int size) {
+      List<LongBinaryOperator> operatorList = new ArrayList<>();
+      int radix = operators.size();
 
       for (int x = 0; x < size; x++) {
-         int operatorCode = (enumeration >> x) & 1;
-         LongBinaryOperator operator = switch (operatorCode) {
-            case OPERATOR_ADD -> Math::addExact;
-            default -> Math::multiplyExact;
-         };
-
-         operators.add(operator);
+         int select = (enumeration / ((int) (Math.pow(radix, x)))) % radix;
+         operatorList.add(operators.get(select).operator);
       }
 
-      return operators;
+      return operatorList;
    }
 
    long calculate(List<Long> numbers, List<LongBinaryOperator> operators) {

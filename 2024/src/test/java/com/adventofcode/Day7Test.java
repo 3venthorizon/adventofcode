@@ -14,6 +14,12 @@ class Day7Test {
    }
 
    @Test
+   void testExample2() {
+      long result = day7.part2("day7_example1.input");
+      assertEquals(11387L, result);
+   }
+
+   @Test
    void testPart1() {
       long result = day7.part1("day7.input");
       assertEquals(1582598718861L, result);
@@ -21,6 +27,7 @@ class Day7Test {
 
    @Test
    void testPart2() {
-
+      long result = day7.part2("day7.input");
+      assertEquals(165278151522644L, result);
    }
 }
